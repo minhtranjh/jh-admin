@@ -1,0 +1,26 @@
+.navItem{
+    cursor: pointer;
+   
+    border-top: 1px solid var(--color-grey)
+}
+.navItem:last-child{
+    border-bottom:1px solid var(--color-grey)
+}
+.navLink.isActiveLink{
+    color: var(--font-white);
+    background-color: var(--color-darkblue);
+}
+.navLink{
+    width: 60px;
+    height: 60px;
+    cursor: pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition: all .5s;
+    text-decoration: none;
+    color: var(--color-darkblue);
+}
+.navLabel{
+    display:none;
+}

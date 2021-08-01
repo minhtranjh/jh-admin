@@ -1,0 +1,21 @@
+.controlButton {
+    width: 100%;
+    border-radius: 5px;
+    border: none;
+    background: none;
+    color: var(--font-grey);
+    font-family:var(--font-nexabold);
+    outline: none;
+    display: flex;
+    align-items:center;
+    justify-content:space-evenly;
+    cursor: pointer;
+    font-weight: 700;
+    padding: 15px 0;
+   
+  }
+  .controlButton.bgBlue {
+    border: none;
+    color: var(--font-white);
+    background-color: var(--color-darkblue);
+  }

@@ -1,0 +1,33 @@
+.sideBar{
+    width: 60px;
+    height: 100vh;
+    position: fixed;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-right:1px solid var(--color-grey)
+}
+
+.navList{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content:center;
+    overflow-x: visible;
+    position: relative;
+}
+
+.logOutBtn p{
+    display:none;
+}
+.logOutBtn{
+    font-size: 18px;
+    cursor: pointer;
+    color: var(--color-darkblue);
+    background: none;
+    border: none;
+    outline: none;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    height: 60px;
+}

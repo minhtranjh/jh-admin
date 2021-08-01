@@ -1,0 +1,22 @@
+.memberPage{
+}
+.newBtn{
+    display:flex;
+    -webkit-box-shadow: 0px -1px 12px -1px rgba(0,0,0,0.36); 
+    box-shadow: 0px -1px 12px -1px rgba(0,0,0,0.36);
+    width: 120px;
+    border-radius: 30px;
+    text-decoration: none;
+    transition: all .3s;
+}
+.newBtn:hover{
+    background: var(--color-grey);
+}
+.searchBarWrapper{
+    display:flex;
+    padding: 20px;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom: 30px;
+}
+

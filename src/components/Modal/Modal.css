@@ -1,0 +1,28 @@
+.modalWrap{
+    position: fixed;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.2);
+    width: 100vw;
+    height:100vh;
+    top: 0;
+    left: 0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.modalContent{
+    width: 90vw;
+    position: relative;
+    height: 70vh;
+    padding: 20px 30px;
+    background: var(--font-white);
+    border-radius: 10px;
+}
+.modalTitle{
+    margin: 20px 0;
+}
+@media screen and (min-width:1024px){
+    .modalContent{
+        width: 40vw;
+    }
+}
