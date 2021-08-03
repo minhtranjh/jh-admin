@@ -9,21 +9,31 @@ const FilterItem = ({
   optionLabel,
   value,
   isOpen,
-  hanldeToggleFilterCard
+  hanldeToggleFilterCard,
 }) => {
   const filterConfigRef = React.createRef();
-  const handleToggleFilterConfig = ()=>{
-      filterConfigRef.current.classList.toggle("isOpen")
-  }
+  const handleToggleFilterConfig = () => {
+    filterConfigRef.current.classList.toggle("isOpen");
+  };
   const filterItemMap = {
     text: {
       render: () => (
-        <div onClick={handleToggleFilterConfig} className={`filterItem ${isOpen ? "isOpen" : ""}`}>
+        <div
+          onClick={handleToggleFilterConfig}
+          className={`filterItem ${isOpen ? "isOpen" : ""}`}
+        >
           <p>
             <span>{label}</span> contains <span>{value}</span>
           </p>
-          <i onClick={()=>hanldeToggleFilterCard(name)} class="fas fa-times"></i>
-          <div  onClick={e=>e.stopPropagation()} ref={filterConfigRef} className="filterConfig">
+          <i
+            onClick={() => hanldeToggleFilterCard(name)}
+            className="fas fa-times"
+          ></i>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            ref={filterConfigRef}
+            className="filterConfig"
+          >
             <input
               onChange={onChange}
               autoComplete="off"
@@ -39,12 +49,22 @@ const FilterItem = ({
     },
     date: {
       render: () => (
-        <div onClick={handleToggleFilterConfig} className={`filterItem ${isOpen ? "isOpen" : ""}`}>
+        <div
+          onClick={handleToggleFilterConfig}
+          className={`filterItem ${isOpen ? "isOpen" : ""}`}
+        >
           <p>
             <span>{label}</span> contains <span>{value}</span>
           </p>
-          <i onClick={()=>hanldeToggleFilterCard(name)} class="fas fa-times"></i>
-          <div  onClick={e=>e.stopPropagation()} ref={filterConfigRef} className="filterConfig">
+          <i
+            onClick={() => hanldeToggleFilterCard(name)}
+            className="fas fa-times"
+          ></i>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            ref={filterConfigRef}
+            className="filterConfig"
+          >
             <input
               onChange={onChange}
               autoComplete="off"
@@ -58,14 +78,57 @@ const FilterItem = ({
         </div>
       ),
     },
-    radio: {
+    checkbox: {
       render: () => (
-        <div onClick={handleToggleFilterConfig} className={`filterItem ${isOpen ? "isOpen" : ""}`}>
+        <div
+          onClick={handleToggleFilterConfig}
+          className={`filterItem ${isOpen ? "isOpen" : ""}`}
+        >
           <p>
             <span>{label}</span> is <span>{value}</span>
           </p>
-          <i onClick={()=>hanldeToggleFilterCard(name)} class="fas fa-times"></i>
-          <div onClick={e=>e.stopPropagation()} ref={filterConfigRef} className="filterConfig">
+          <i
+            onClick={() => hanldeToggleFilterCard(name)}
+            className="fas fa-times"
+          ></i>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            ref={filterConfigRef}
+            className="filterConfig"
+          >
+            <div className="filterRadio">
+              <input
+                onChange={onChange}
+                type="checkbox"
+                id={`html${label}`}
+                name={name}
+                value={value}
+                checked={value}
+              />
+              <label htmlFor={`html${label}`}>{label}</label>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    radio: {
+      render: () => (
+        <div
+          onClick={handleToggleFilterConfig}
+          className={`filterItem ${isOpen ? "isOpen" : ""}`}
+        >
+          <p>
+            <span>{label}</span> is <span>{value}</span>
+          </p>
+          <i
+            onClick={() => hanldeToggleFilterCard(name)}
+            className="fas fa-times"
+          ></i>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            ref={filterConfigRef}
+            className="filterConfig"
+          >
             {options.map((op) => {
               return (
                 <div key={op.name} className="filterRadio">

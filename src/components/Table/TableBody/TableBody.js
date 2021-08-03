@@ -1,6 +1,6 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
-const TableBody = ({ tablePropertyList, tableDataList, handleRemoveItem }) => {
+const TableBody = ({ tablePropertyList, tableDataList, rowHandlers }) => {
   const history = useHistory();
   return (
     <tbody>
@@ -9,7 +9,7 @@ const TableBody = ({ tablePropertyList, tableDataList, handleRemoveItem }) => {
           <tr key={rowData.id}>
             {tablePropertyList.map((label) => (
               <td key={label.label} data-label={label.label}>
-                {label.render({ rowData, index, handleRemoveItem, history })}
+                {label.render({ rowData, index, rowHandlers, history })}
               </td>
             ))}
           </tr>

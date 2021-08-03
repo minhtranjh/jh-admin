@@ -23,6 +23,8 @@ export default (state = initialState, action) => {
         ...state,
         ...action.payload,
         isAuthenticated: true,
+        error: "",
+
         isAuthenticating: false,
       };
       return state;
@@ -45,12 +47,16 @@ export default (state = initialState, action) => {
         ...state,
         ...action.payload,
         isAuthenticated: true,
+        error: "",
+
         isAuthenticating: false,
       };
-    case `${authConstants.USER_SIGNUP}_REQUEST`:
+    case `${authConstants.USER_SIGNUP}_FAILED`:
       state = {
         ...state,
-        isAuthenticating: true,
+        ...action.payload,
+        isAuthenticated: false,
+        isAuthenticating: false,
       };
       return state;
     case `${authConstants.USER_LOGOUT}_REQUEST`:
@@ -58,24 +64,31 @@ export default (state = initialState, action) => {
         ...state,
         isLogggingout: true,
       };
-      return state
+      return state;
 
     case `${authConstants.USER_LOGOUT}_SUCCESS`:
       state = {
         ...state,
         ...action.payload,
         isLogggingout: false,
-        isAuthenticated : false,
+        error: "",
+
+        isAuthenticated: false,
       };
-      return state
+      return state;
     case `${authConstants.USER_LOGOUT}_FAILED`:
       state = {
         ...state,
         ...action.payload,
         isLogggingout: false,
       };
-      return state
-
+      return state;
+    case `${authConstants.CLEAR_ERROR_MESSAGE}_SUCCESS`:
+      state = {
+        ...state,
+        error: "",
+      };
+      return state;
     default:
       return state;
   }

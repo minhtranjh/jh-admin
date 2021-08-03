@@ -7,13 +7,8 @@ import { useDispatch } from "react-redux";
 import { logOutWithFirebase } from "../../redux/actions/auth";
 const listNavItem = [
   {
-    label : "Dashboard",
-    path : "/",
-    icon : <i className="fas fa-tachometer-alt"></i>
-  },
-  {
     label: "Member",
-    path: "/member",
+    path: "/",
     icon: <i className="far fa-user"></i>,
   },
   {

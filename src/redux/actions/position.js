@@ -36,7 +36,16 @@ export const getPositionListFromFirebase = () => {
     }
   };
 };
-
+export const filterListPosition = (filterObj) => {
+  return async (dispatch) => {
+    dispatch({
+      type: `${positionContstants.FILTER_POSITION}_SUCCESS`,
+      payload: {
+        filterObj,
+      },
+    });
+  };
+};
 export const getPositionDetailsByIdFromFirebase = (id) => {
   return async (dispatch) => {
     dispatch({
@@ -46,14 +55,21 @@ export const getPositionDetailsByIdFromFirebase = (id) => {
       const unsubscribeGetPositionDetails = positionTbRef
         .doc(id)
         .onSnapshot((doc) => {
-          const positionDetails = {
-            ...doc.data(),
-            id: doc.id,
-            createdAt: doc.data().createdAt.toDate().toDateString(),
-          };
+          if(doc.exists){
+            const positionDetails = {
+              ...doc.data(),
+              id: doc.id,
+              createdAt: doc.data().createdAt.toDate().toDateString(),
+            };
+            dispatch({
+              type: `${positionContstants.GET_POSITION_DETAILS}_SUCCESS`,
+              payload: { positionDetails, unsubscribeGetPositionDetails },
+            });
+            return
+          }
           dispatch({
-            type: `${positionContstants.GET_POSITION_DETAILS}_SUCCESS`,
-            payload: { positionDetails, unsubscribeGetPositionDetails },
+            type: `${positionContstants.GET_POSITION_DETAILS}_FAILED`,
+            payload: { error : "Not found" },
           });
         });
     } catch (error) {
@@ -73,7 +89,7 @@ export const createNewPositionToFirebase = (position) => {
     });
     const unSubCreatePostion = positionTbRef
       .add({
-        name: position.name.value,
+        name: position.name,
         createdAt: new Date(),
       })
       .then((_) => {
@@ -92,6 +108,13 @@ export const createNewPositionToFirebase = (position) => {
       });
   };
 };
+export const  clearFilterPositionList = ()=>{
+  return async (dispatch) => {
+    dispatch({
+      type : `${positionContstants.CLEAR_FILTERED_POSITION_LIST}_SUCCESS`
+    })
+  }
+}
 export const editPositionDetailsToFirebase = (position) => {
   return async (dispatch) => {
     dispatch({
@@ -100,7 +123,7 @@ export const editPositionDetailsToFirebase = (position) => {
     const unSubEditPostion = positionTbRef
       .doc(position.id)
       .update({
-        name: position.name.value,
+        name: position.name,
       })
       .then((_) => {
         dispatch({
@@ -145,3 +168,10 @@ export const removePositionFromFirebase = (id) => {
       });
   };
 };
+export const clearPositionErrorMessage = ()=>{
+  return async (dispatch) => {
+    dispatch({
+      type : `${positionContstants.CLEAR_POSITION_ERROR_MESSAGE}_SUCCESS`
+    })
+  }
+}

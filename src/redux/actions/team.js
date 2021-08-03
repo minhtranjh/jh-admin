@@ -5,7 +5,13 @@ const teamTbRef = firestore.collection("teams_tb");
 const membersTbRef = firestore.collection("members_tb");
 const getLeaderById = async (id) => {
   const leader = await membersTbRef.doc(id).get();
-  return leader.exists ? { ...leader.data(), id: leader.id } : undefined;
+  return leader.exists
+    ? {
+        ...leader.data(),
+        name: leader.data().lastName + " " + leader.data().firstName,
+        id: leader.id,
+      }
+    : undefined;
 };
 const isDoneLoopingSnapShot = (index, size) => {
   return index === size;
@@ -25,7 +31,7 @@ export const getTeamListFromFirebase = () => {
             ...doc.data(),
             id: doc.id,
             createdAt: doc.data().createdAt.toDate().toDateString(),
-            leader,
+            leader: leader.name,
           });
           index++;
           if (isDoneLoopingSnapShot(index, snap.size)) {
@@ -57,16 +63,23 @@ export const getTeamDetailsByIdFromFirebase = (id) => {
     });
     try {
       const unSubGetTeamDetails = teamTbRef.doc(id).onSnapshot(async (doc) => {
-        const leader = await getLeaderById(doc.data().leaderId);
-        const teamDetails = {
-          ...doc.data(),
-          id: doc.id,
-          createdAt: doc.data().createdAt.toDate().toDateString(),
-          leader,
-        };
+        if (doc.exists) {
+          const leader = await getLeaderById(doc.data().leaderId);
+          const teamDetails = {
+            ...doc.data(),
+            id: doc.id,
+            createdAt: doc.data().createdAt.toDate().toDateString(),
+            leader: leader.id,
+          };
+          dispatch({
+            type: `${teamConstants.GET_TEAM_DETAILS}_SUCCESS`,
+            payload: { teamDetails, unSubGetTeamDetails },
+          });
+          return;
+        }
         dispatch({
-          type: `${teamConstants.GET_TEAM_DETAILS}_SUCCESS`,
-          payload: { teamDetails, unSubGetTeamDetails },
+          type: `${teamConstants.GET_TEAM_DETAILS}_FAILED`,
+          payload: { error : "404" },
         });
       });
     } catch (error) {
@@ -79,6 +92,23 @@ export const getTeamDetailsByIdFromFirebase = (id) => {
     }
   };
 };
+export const filterTeamList = (filterObj) => {
+  return async (dispatch) => {
+    dispatch({
+      type: `${teamConstants.FILTER_TEAM}_SUCCESS`,
+      payload: {
+        filterObj,
+      },
+    });
+  };
+};
+export const clearFilteredTeamList = () => {
+  return async (dispatch) => {
+    dispatch({
+      type: `${teamConstants.CLEAR_FILTERED_TEAM_LIST}_SUCCESS`,
+    });
+  };
+};
 export const createNewTeamToFirebase = (team) => {
   return async (dispatch) => {
     dispatch({
@@ -86,8 +116,8 @@ export const createNewTeamToFirebase = (team) => {
     });
     const unSubCreateTeam = teamTbRef
       .add({
-        name: team.name.value,
-        leaderId: team.leader.value,
+        name: team.name,
+        leaderId: team.leader,
         createdAt: new Date(),
       })
       .then((_) => {
@@ -111,16 +141,26 @@ export const editTeamDetailsToFirebase = (team) => {
     dispatch({
       type: `${teamConstants.EDIT_TEAM_DETAILS}_REQUEST`,
     });
+    const teamIdOfNewLeader = await (
+      await membersTbRef.doc(team.leader).get()
+    ).data.teamId;
+    const oldLeaderId = (await teamTbRef.doc(team.id).get()).data().leaderId;
+    const teamIdOfOldLeader = (await membersTbRef.doc(oldLeaderId).get()).data()
+      .teamId;
+    if (teamIdOfOldLeader !== teamIdOfNewLeader) {
+      membersTbRef.doc(team.leader).update({
+        teamId: teamIdOfOldLeader,
+      });
+    }
     const unSubEditTeam = teamTbRef
       .doc(team.id)
       .update({
-        name: team.name.value,
-        leaderId: team.leader.value,
+        leaderId: team.leader,
       })
       .then((_) => {
         dispatch({
           type: `${teamConstants.EDIT_TEAM_DETAILS}_SUCCESS`,
-          payload: { unSubEditTeam, message: "Create successfully" },
+          payload: { unSubEditTeam, message: "Edit successfully" },
         });
       })
       .catch((error) => {
@@ -142,7 +182,6 @@ export const removeTeamFromFirebase = (id) => {
       .doc(id)
       .delete()
       .then(() => {
-        console.log(id);
         dispatch({
           type: `${teamConstants.DELETE_TEAM}_SUCCESS`,
           payload: {
@@ -161,3 +200,10 @@ export const removeTeamFromFirebase = (id) => {
       });
   };
 };
+export const clearTeamErrorMessage = ()=>{
+  return async (dispatch) => {
+    dispatch({
+      type : `${teamConstants.CLEAR_TEAM_ERROR_MESSAGE}_SUCCESS`
+    })
+  }
+}

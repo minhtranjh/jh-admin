@@ -13,10 +13,10 @@ import {
   editMemberDetailsToFirebase,
   getListMembersFromFirebase,
   getMemberDetailsByIdFromFirebase,
-  setMemberDetailFromTempList,
   removeMemberFromFirebase,
   filterListMember,
   clearFilteredMemberList,
+  getMemberDetailsFromTempList,
 } from "../../redux/actions/member";
 import { Link, NavLink, useHistory, useParams } from "react-router-dom";
 import FormModal from "../../components/FormModal/FormModal";
@@ -29,6 +29,8 @@ import FormLoading from "../../components/FormLoading/FormLoading";
 import FilterBar from "../../components/FilterBar/FilterBar";
 import useFilter from "../../utils/useFilter";
 import useValidator from "../../utils/useValidator";
+import { useRef } from "react";
+import SearchBar from "../../components/SearchBar/SearchBar";
 const tablePropertyList = [
   {
     label: "No.",
@@ -80,11 +82,11 @@ const tablePropertyList = [
   },
   {
     label: "Action",
-    render: ({ rowData, handleRemoveItem, history }) => {
+    render: ({ rowData, rowHandlers, history }) => {
       return (
-        <div class="tableAction">
+        <div className="tableAction">
           <button
-            onClick={() => handleRemoveItem(rowData.id)}
+            onClick={() => rowHandlers.handleRemoveMember(rowData.id)}
             className="tableWidgetBtn"
           >
             <i className="far fa-trash-alt"></i>
@@ -92,7 +94,7 @@ const tablePropertyList = [
           <NavLink
             to={{
               pathname: `${history.location.pathname}`,
-              search: "?form=true",
+              search: `?form=true&id=${rowData.id}`,
               state: rowData.id,
             }}
           >
@@ -235,10 +237,11 @@ const initialFilterList = {
     value: "",
   },
 };
-const MemberPage = () => {
+const MemberPage = (props) => {
   const dispatch = useDispatch();
   const history = useHistory();
   const params = useParams(); // needed
+  const firstRender = useRef(true);
   const query = useQuery();
   const { position, member, team } = useSelector((state) => state);
   const {
@@ -248,79 +251,77 @@ const MemberPage = () => {
     handleSubmitCallback,
     clearInputForm,
     handleSetTouchedInput,
+    setValueToInputValue,
   } = useForm(initialInputList, handleSubmitForm);
   const {
     filterList,
+    handleCreateFilterObject,
     setFilterList,
     handleOnChangeFilter,
     handleOnAppyFilter,
   } = useFilter(initialFilterList, applyFilter);
 
-  const { validateEmptyField, validateEmailFormat, combineValidation } =
-    useValidator();
+  const { validateEmptyField, validateEmailFormat } = useValidator();
 
   useEffect(() => {
-    const addValidatorToInputList = () => {
-      inputList.firstName.validators = [validateEmptyField];
-      inputList.lastName.validators = [validateEmptyField];
-      inputList.email.validators = [validateEmptyField, validateEmailFormat];
-      inputList.position.validators = [validateEmptyField];
-      inputList.team.validators = [validateEmptyField];
-      inputList.gender.validators = [validateEmptyField];
-      inputList.about.validators = [validateEmptyField];
-      inputList.phone.validators = [validateEmptyField];
-      inputList.dateOfBirth.validators = [validateEmptyField];
-      inputList.picture.validators = [validateEmptyField];
-    };
-    addValidatorToInputList();
+    inputList.firstName.validators = [
+      validateEmptyField("Field must be not empty"),
+    ];
+    inputList.lastName.validators = [
+      validateEmptyField("Field must be not empty")
+    ];
+    inputList.email.validators = [
+      validateEmptyField("Field must be not empty"),
+      validateEmailFormat("Email is not valid")
+    ];
+    inputList.position.validators = [
+      validateEmptyField("Field must be not empty")
+    ];
+    inputList.team.validators = [validateEmptyField("Field must be not empty")];
+    inputList.gender.validators = [
+      validateEmptyField("Field must be not empty"),
+    ];
+    inputList.about.validators = [
+      validateEmptyField("Field must be not empty"),
+    ];
+    inputList.phone.validators = [
+      validateEmptyField("Field must be not empty"),
+    ];
+    inputList.dateOfBirth.validators = [
+      validateEmptyField("Field must be not empty"),
+    ];
+    inputList.picture.validators = [
+      validateEmptyField("Field must be not empty"),
+    ];
   }, []);
 
   useEffect(() => {
-    const getMemberDetailsFromReduxStore = () => {
-      const id = history.location.state;
-      if (id && query.get("form")) {
-        const result = member.memberDetailsTempList.find(
-          (item) => item.id === id
-        );
-        if (result) {
-          dispatch(setMemberDetailFromTempList(result));
-          return;
-        }
-        dispatch(getMemberDetailsByIdFromFirebase(id));
-      }
-    };
-    getMemberDetailsFromReduxStore();
-  }, [history.location.state]);
-
+    const id = query.get("id");
+    if (id && query.get("form") === "true") {
+      dispatch(getMemberDetailsByIdFromFirebase(id));
+      return;
+    }
+  }, [history.location.search]);
   useEffect(() => {
-    if (!member.isMemberDetailsLoading) {
-      const addMemberDetailsValueToInputValues = () => {
-        const newList = { ...inputList };
-        for (const input in newList) {
-          newList[input].value = member.memberDetails[input];
-        }
-        setInputList(newList);
-      };
-      addMemberDetailsValueToInputValues();
+    if (
+      !member.isMemberDetailsLoading &&
+      JSON.stringify(member.memberDetails) !== "{}"
+    ) {
+      setValueToInputValue(member.memberDetails);
     }
   }, [member.isMemberDetailsLoading]);
-
   useEffect(() => {
     if (!position.isLoading && !team.isLoading) {
-      const addPositionAndTeamListToSelectionInputValue = () => {
-        const newInputList = { ...inputList };
-        const newFilterList = { ...filterList };
-        newInputList.position.options = position.positionList;
-        newFilterList.position.options = position.positionList;
-        newFilterList.team.options = team.teamList;
-        newInputList.team.options = team.teamList;
-        setInputList(newInputList);
-        setFilterList(newFilterList);
-      };
-      addPositionAndTeamListToSelectionInputValue();
+      const newInputList = { ...inputList };
+      const newFilterList = { ...filterList };
+      newInputList.position.options = position.positionList;
+      newFilterList.position.options = position.positionList;
+      newFilterList.team.options = team.teamList;
+      newInputList.team.options = team.teamList;
+      setInputList(newInputList);
+      setFilterList(newFilterList);
     }
   }, [position.isLoading, team.isLoading]);
-
   useEffect(() => {
     const getNeededStateFromRedux = () => {
       dispatch(getListMembersFromFirebase());
@@ -330,70 +331,68 @@ const MemberPage = () => {
     getNeededStateFromRedux();
   }, [dispatch]);
   useEffect(() => {
-    if (!member.isDeleting && !member.isEditting && !member.isCreating) {
+    if (
+      history.location.search &&
+      query.get("search") === "true" &&
+      !member.isLoading
+    ) {
+      const filterObj = handleCreateFilterObject();
+      if (member.memberList.length > 0) {
+        return dispatch(filterListMember(filterObj));
+      }
+    }
+  }, [history.location.search, member.isLoading]);
+  useEffect(() => {
+    updateSearchParams();
+  }, [member.isEditting, member.isCreating]);
+
+  function updateSearchParams() {
+    if (firstRender.current) {
       history.push({
         pathname: history.location.pathname,
-        state: undefined,
+        search: history.location.search,
+      });
+      firstRender.current = false;
+      return;
+    }
+    if (!member.isEditting && !member.isCreating) {
+      history.push({
+        pathname: history.location.pathname,
+        search: undefined,
       });
     }
-  }, [member.isDeleting, member.isEditting, member.isCreating]);
-
-  useEffect(() => {
-    const handleFilterMemberList = () => {
-      if (history.location.search && query.get("search") && !member.isLoading) {
-        const newFilterList = { ...filterList };
-        const filterObj = {};
-        for (const filter in newFilterList) {
-          if (query.get(filter)) {
-            newFilterList[filter].value = query.get(filter);
-            newFilterList[filter].isOpen = true;
-            filterObj[filter] = { ...newFilterList[filter] };
-          } else {
-            newFilterList[filter].value = "";
-            newFilterList[filter].isOpen = false;
-          }
-        }
-        setFilterList(newFilterList);
-        if (member.memberList.length > 0) {
-          return dispatch(filterListMember(filterObj));
-        }
-      }
-    };
-    handleFilterMemberList();
-  }, [history.location.search, member.isLoading]);
-
-  function handleSubmitForm() {
-    if (!history.location.state) {
-      return dispatch(createNewMemberToFirebase(inputList));
+  }
+  function handleSubmitForm(member) {
+    if (!query.get("id")) {
+      return dispatch(createNewMemberToFirebase(member));
     }
     return dispatch(
       editMemberDetailsToFirebase({
-        ...inputList,
-        id: history.location.state,
+        ...member,
+        id: query.get("id"),
       })
     );
   }
-
-  function applyFilter() {
-    let searchParams = "search=true&";
-    const searchParamsTemp = "search=true&";
-    for (const filter in filterList) {
-      if (filterList[filter].isOpen) {
-        searchParams += `${filter}=${filterList[filter].value}&`;
-      }
-    }
-    if (searchParams === searchParamsTemp) {
-      history.push({
-        pathname: history.location.pathname,
-        state: history.location.state,
-      });
-      return dispatch(clearFilteredMemberList());
-    }
+  const clearFilterUrlParam = () => {
     history.push({
       pathname: history.location.pathname,
-      search: `?${searchParams}`,
-      state: history.location.state,
+      search: "",
     });
+  };
+  const pushFilterListToSearchParam = (filterListSearchParams) => {
+    history.push({
+      pathname: history.location.pathname,
+      search: `?${filterListSearchParams}`,
+    });
+  };
+  function applyFilter(filterListSearchParams) {
+    const filterListSearchParamsTemp = "search=true&";
+    if (filterListSearchParams === filterListSearchParamsTemp) {
+      clearFilterUrlParam();
+      dispatch(clearFilteredMemberList());
+      return;
+    }
+    pushFilterListToSearchParam(filterListSearchParams);
   }
   function handleRemoveMember(id) {
     dispatch(removeMemberFromFirebase(id));
@@ -420,11 +419,11 @@ const MemberPage = () => {
         />
         <PageContent>
           <div className="searchBarWrapper">
+
             <Link
               to={{
                 pathname: `${history.location.pathname}`,
                 search: "?form=true",
-                state: undefined,
               }}
               className="newBtn"
             >
@@ -440,7 +439,7 @@ const MemberPage = () => {
             handleOnApplyFilter={handleOnAppyFilter}
           />
           <Table
-            handleRemoveItem={handleRemoveMember}
+            rowHandlers={{ handleRemoveMember }}
             tablePropertyList={tablePropertyList}
             tableDataList={
               !member.isFiltering && member.filteredMemberList.length <= 0
@@ -453,18 +452,20 @@ const MemberPage = () => {
       <FormModal
         isContentLoading={member.isMemberDetailsLoading}
         title={
-          history.location.state
-            ? `Edit ${member.memberDetails.firstName} profile`
+          query.get("id")
+            ? `Edit member`
             : "Create a new member"
         }
         clearForm={clearInputForm}
         handleSetTouchedInput={handleSetTouchedInput}
         handleSubmitForm={handleSubmitCallback}
-        combineValidation={combineValidation}
         handleOnInputChange={handleOnInputChange}
         inputList={inputList}
         history={history}
-      />
+        isModalOpen={!!query.get("form")}
+
+        error={member.error}
+        />
     </>
   );
 };

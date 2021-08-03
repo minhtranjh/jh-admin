@@ -1,7 +1,7 @@
 import React from "react";
 import "./AuthInput.css";
 function AuthInput({
-  validate,
+  error,
   labelIcon,
   value,
   handleOnInputChange,
@@ -16,7 +16,7 @@ function AuthInput({
     <div className="inputGroup">
       <div className="inputIcon">{labelIcon}</div>
       <input
-      onBlur={handleSetTouchedInput}
+        onBlur={handleSetTouchedInput}
         placeholder={placeholder}
         autoComplete="off"
         onChange={handleOnInputChange}
@@ -25,7 +25,7 @@ function AuthInput({
         type={type}
       />
       {validateIcon}
-      <p className="inputError">{isTouched&&validate({ value, label: placeholder })}</p>
+      <p className="inputError">{isTouched&&error}</p>
       <div className="inputLine"></div>
     </div>
   );

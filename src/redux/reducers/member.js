@@ -9,9 +9,10 @@ const initialState = {
   isEditting: false,
   isDeleting: false,
   isCreating: false,
-  isFiltering : false,
+  isFiltering: false,
 };
 const handleFilterList = (list, filterObj) => {
+  console.log(list, filterObj);
   const newMemberList = list.filter((value) => {
     for (var key in filterObj) {
       const query = filterObj[key].value.toLowerCase();
@@ -35,6 +36,7 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         ...action.payload,
+        error : "",
         isLoading: false,
       };
       return state;
@@ -55,6 +57,8 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         ...action.payload,
+        error : "",
+
         isCreating: false,
       };
       return state;
@@ -65,16 +69,21 @@ export default (state = initialState, action) => {
         isCreating: false,
       };
       return state;
-    case `${memberConstants.SET_MEMBER_DETAILS_FROM_TEMP_LIST}_REQUEST`:
+    case `${memberConstants.GET_MEMBER_DETAILS_FROM_TEMP_LIST}_REQUEST`:
       state = {
         ...state,
         isMemberDetailsLoading: true,
       };
       return state;
-    case `${memberConstants.SET_MEMBER_DETAILS_FROM_TEMP_LIST}_SUCCESS`:
+    case `${memberConstants.GET_MEMBER_DETAILS_FROM_TEMP_LIST}_SUCCESS`:
+      const result = state.memberDetailsTempList.find(
+        (item) => item.id === action.payload.id
+      );
       state = {
         ...state,
-        ...action.payload,
+        memberDetails: result ? result : {},
+        error : "",
+
         isMemberDetailsLoading: false,
       };
       return state;
@@ -92,6 +101,8 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         ...action.payload,
+        error : "",
+
         memberDetailsTempList: newArr,
         isMemberDetailsLoading: false,
       };
@@ -113,6 +124,8 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         ...action.payload,
+        error : "",
+
         isEditting: false,
       };
       return state;
@@ -134,6 +147,8 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         ...action.payload,
+        error : "",
+
         isDeleting: false,
       };
       return state;
@@ -149,16 +164,28 @@ export default (state = initialState, action) => {
       const newMemberList = handleFilterList(state.memberList, filterObj);
       state = {
         ...state,
-        isFiltering : true,
+        isFiltering: true,
+
+        error : "",
+
         filteredMemberList: newMemberList,
       };
       return state;
-    case `${memberConstants.CLEAR_FILTER_LIST}_SUCCESS` : 
+    case `${memberConstants.CLEAR_FILTER_LIST}_SUCCESS`:
       state = {
         ...state,
-        filteredMemberList : [],
-        isFiltering : false,
-      }
+        filteredMemberList: [],
+        error : "",
+
+        isFiltering: false,
+      };
+      return state;
+    case `${memberConstants.CLEAR_MEMBER_ERROR_MESSAGE}_SUCCESS`:
+      state = {
+        ...state,
+        error: "",
+      };
+      return state;
     default:
       return state;
   }

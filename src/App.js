@@ -6,11 +6,12 @@ import { checkIfUserLoggedIn } from "./redux/actions/auth";
 import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
 import SignInPage from "./pages/SignInPage/SignInPage";
 import SignOutPage from "./pages/SignUpPage/SignUpPage";
-import DashboardPage from "./pages/DashboardPage/DashboardPage";
 import Layout from "./components/Layout/Layout";
 import MemberPage from "./pages/MemberPage/MemberPage";
 import PositionPage from "./pages/PositionPage/PositionPage";
 import TeamPage from "./pages/TeamPage/TeamPage";
+import UserPage from "./pages/UserPage/UserPage";
+import NotFoundPage from "./pages/NotFoundPage/NotFoundPage";
 function App() {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);
@@ -21,17 +22,20 @@ function App() {
       }
     };
     checkIsAuthenticated();
-  }, [dispatch]);
+  }, [isAuthenticated]);
   return (
     <Router>
-      <Route exact path="/login" component={SignInPage} />
-      <Route exact path="/signup" component={SignOutPage} />
-      <Layout>
-        <PrivateRoute exact path="/" component={DashboardPage} />
-        <PrivateRoute path="/member" component={MemberPage} />
-        <PrivateRoute path="/position" component={PositionPage} />
-        <PrivateRoute path="/team" component={TeamPage} />
-      </Layout>
+      <Switch>
+        <Route exact path="/login" component={SignInPage} />
+        <Route exact path="/signup" component={SignOutPage} />
+        <Layout>
+          <PrivateRoute exact path="/" component={MemberPage} />
+          <PrivateRoute path="/position" component={PositionPage} />
+          <PrivateRoute path="/team" component={TeamPage} />
+          <PrivateRoute path="/user" component={UserPage} />
+        </Layout>
+        <Route  path="*" component={NotFoundPage} />
+      </Switch>
     </Router>
   );
 }

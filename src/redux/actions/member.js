@@ -13,11 +13,11 @@ const getPositionById = async (positionId) => {
     : undefined;
 };
 const getTeamById = async (teamId) => {
-  if(teamId){
+  if (teamId) {
     const getTeamSnap = await teamTbRef.doc(teamId).get();
-  return getTeamSnap.exists
-    ? { ...getTeamSnap.data(), id: getTeamSnap.id }
-    : undefined;
+    return getTeamSnap.exists
+      ? { ...getTeamSnap.data(), id: getTeamSnap.id }
+      : undefined;
   }
 };
 const getTeamNameByLeaderId = async (leaderId) => {
@@ -38,36 +38,36 @@ const isDoneLoopingSnapshot = (index, size) => {
   return index === size;
 };
 const pushPictureToStorage = async (file) => {
-  const name = new Date() + "-" + file.name;
-  const type = file.type;
-  const snap = await storage.child(name).put(file, type);
-  return snap.ref.getDownloadURL();
+  if (file) {
+    const name = new Date() + "-" + file.name;
+    const type = file.type;
+    const snap = await storage.child(name).put(file, type);
+    return snap.ref.getDownloadURL();
+  }
+  return;
 };
 export const createNewMemberToFirebase = (member) => {
   return async (dispatch) => {
     dispatch({
       type: `${memberConstants.CREATE_NEW_MEMBER}_REQUEST`,
     });
-    const url = await pushPictureToStorage(member.picture.value);
-    const unsubscribeCreateMember = membersTbRef
+    let url;
+    if (member.picture.type) {
+      url = await pushPictureToStorage(member.picture);
+    }
+    const unsubCreateMember = membersTbRef
       .add({
-        firstName: member.firstName.value,
-        lastName: member.lastName.value,
-        gender: member.gender.value,
-        dateOfBirth: new Date(member.dateOfBirth.value),
-        phone: member.phone.value,
-        position: member.position.value,
-        teamId: member.team.value,
-        email: member.email.value,
-        about: member.about.value,
+        ...member,
+        teamId: member.team,
+        dateOfBirth: new Date(member.dateOfBirth),
         joinedDate: new Date(),
-        picture: url,
+        picture: url ? url : "",
       })
       .then((_) => {
         dispatch({
           type: `${memberConstants.CREATE_NEW_MEMBER}_SUCCESS`,
           payload: {
-            unsubscribeCreateMember,
+            unsubCreateMember,
             message: "Create successfully",
           },
         });
@@ -96,18 +96,11 @@ const formatInputDate = (d) => {
       : Number(date.getDate()));
   return formattedDate;
 };
-export const setMemberDetailFromTempList = (memberDetails) => {
+export const getMemberDetailsFromTempList = (id) => {
   return async (dispatch) => {
     dispatch({
-      type: `${memberConstants.SET_MEMBER_DETAILS_FROM_TEMP_LIST}_REQUEST`,
-    });
-    setTimeout(() => {
-      dispatch({
-        type: `${memberConstants.SET_MEMBER_DETAILS_FROM_TEMP_LIST}_SUCCESS`,
-        payload: {
-          memberDetails,
-        },
-      });
+      type: `${memberConstants.GET_MEMBER_DETAILS_FROM_TEMP_LIST}_SUCCESS`,
+      payload: { id },
     });
   };
 };
@@ -117,25 +110,34 @@ export const getMemberDetailsByIdFromFirebase = (id) => {
       type: `${memberConstants.GET_MEMBER_DETAILS}_REQUEST`,
     });
     try {
-      const unsubscribeMemberDetails = membersTbRef
-        .doc(id)
-        .onSnapshot(async (doc) => {
-          const position = await getPositionById(doc.data().position);
-          const team = await getTeamById(doc.data().teamId);
-          const birth = doc.data().dateOfBirth;
-          const formattedBirth = formatInputDate(birth);
-          const memberDetails = {
-            ...doc.data(),
-            id: doc.id,
-            position: position ? position.id : "",
-            team: team ? team.id : "",
-            dateOfBirth: formattedBirth,
-          };
-          dispatch({
-            type: `${memberConstants.GET_MEMBER_DETAILS}_SUCCESS`,
-            payload: { memberDetails, unsubscribeMemberDetails },
+      if (id) {
+        const unsubscribeMemberDetails = membersTbRef
+          .doc(id)
+          .onSnapshot(async (doc) => {
+            if (doc.exists) {
+              const position = await getPositionById(doc.data().position);
+              const team = await getTeamById(doc.data().teamId);
+              const birth = doc.data().dateOfBirth;
+              const formattedBirth = formatInputDate(birth);
+              const memberDetails = {
+                ...doc.data(),
+                id: doc.id,
+                position: position ? position.id : "",
+                team: team ? team.id : "",
+                dateOfBirth: formattedBirth,
+              };
+              dispatch({
+                type: `${memberConstants.GET_MEMBER_DETAILS}_SUCCESS`,
+                payload: { memberDetails, unsubscribeMemberDetails },
+              });
+              return
+            }
+            dispatch({
+              type: `${memberConstants.GET_MEMBER_DETAILS}_FAILED`,
+              payload: { error: "Not found" },
+            });
           });
-        });
+      }
     } catch (error) {
       dispatch({
         type: `${memberConstants.GET_MEMBER_DETAILS}_FAILED`,
@@ -146,31 +148,33 @@ export const getMemberDetailsByIdFromFirebase = (id) => {
     }
   };
 };
-export const filterMemberFromFirebase = ()=>{
-  return async (dispatch) => {
-
-  }
-}
-export const filterListMember = (filterObj)=>{
-  return async (dispatch) => {
-  
-    dispatch({
-      type : `${memberConstants.FILTER_MEMBER}_SUCCESS`,
-      payload : {
-        filterObj
-      }
-    })
-    
-  }
-}
-export const clearFilteredMemberList = ()=>{
+export const filterMemberFromFirebase = () => {
+  return async (dispatch) => {};
+};
+export const filterListMember = (filterObj) => {
   return async (dispatch) => {
     dispatch({
-      type : `${memberConstants.CLEAR_FILTER_LIST}_SUCCESS`,
-
-    })
-  }
-}
+      type: `${memberConstants.FILTER_MEMBER}_SUCCESS`,
+      payload: {
+        filterObj,
+      },
+    });
+  };
+};
+export const clearFilteredMemberList = () => {
+  return async (dispatch) => {
+    dispatch({
+      type: `${memberConstants.CLEAR_FILTER_LIST}_SUCCESS`,
+    });
+  };
+};
+export const getMemberDoesNotManageAnyTeam = () => {
+  return async (dispatch) => {
+    dispatch({
+      type: `${memberConstants.GET_MEMBER_NOT_MANAGE_TEAM}_REQUEST`,
+    });
+  };
+};
 export const getListMembersFromFirebase = () => {
   return async (dispatch) => {
     dispatch({
@@ -195,11 +199,11 @@ export const getListMembersFromFirebase = () => {
             ...member,
             id: member.id,
             team: team ? team.name : undefined,
-            name: member.firstName + " " + member.lastName,
+            name: member.lastName + " " + member.firstName,
             leaderOf: leaderOfTeam ? leaderOfTeam.name : undefined,
             managedBy: managedBy
               ? {
-                  name: managedBy.firstName + " " + managedBy.lastName,
+                  name: managedBy.lastName + " " + managedBy.firstName,
                   id: managedBy.id,
                 }
               : undefined,
@@ -223,29 +227,23 @@ export const editMemberDetailsToFirebase = (member) => {
       type: `${memberConstants.EDIT_MEMBER_DETAILS}_REQUEST`,
     });
     let url;
-    if (member.picture.value.type) {
-      url = await pushPictureToStorage(member.picture.value);
+    if (member.picture.type) {
+      url = await pushPictureToStorage(member.picture);
     }
-    const unsubscribeEditMemberDetails = membersTbRef
+    const unsubEditMember = membersTbRef
       .doc(member.id)
       .update({
-        firstName: member.firstName.value,
-        lastName: member.lastName.value,
-        gender: member.gender.value,
-        email: member.email.value,
-        dateOfBirth: new Date(member.dateOfBirth.value),
-        phone: member.phone.value,
-        position: member.position.value,
-        teamId: member.team.value,
-        about: member.about.value,
+        ...member,
+        teamId: member.team,
         joinedDate: new Date(),
-        picture: url ? url : member.picture.value,
+        dateOfBirth: new Date(member.dateOfBirth),
+        picture: url ? url : member.picture,
       })
       .then((_) => {
         dispatch({
           type: `${memberConstants.EDIT_MEMBER_DETAILS}_SUCCESS`,
           payload: {
-            unsubscribeEditMemberDetails,
+            unsubEditMember,
             message: "Edit successfully",
           },
         });
@@ -285,5 +283,13 @@ export const removeMemberFromFirebase = (id) => {
           },
         });
       });
+  };
+};
+
+export const clearMemberErrorMessage = () => {
+  return async (dispatch) => {
+    dispatch({
+      type: `${memberConstants.CLEAR_MEMBER_ERROR_MESSAGE}_SUCCESS`,
+    });
   };
 };

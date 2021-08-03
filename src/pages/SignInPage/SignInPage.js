@@ -6,7 +6,10 @@ import AuthenticateLayout from "../../components/AuthenticateLayout/Authenticate
 import AuthInput from "../../components/AuthInput/AuthInput";
 import Button from "../../components/Button/Button";
 import LoadingIcon from "../../components/LoadingIcon/LoadingIcon";
-import { handleLoginWithFirebase } from "../../redux/actions/auth";
+import {
+  clearErrorMessage,
+  handleLoginWithFirebase,
+} from "../../redux/actions/auth";
 import useForm from "../../utils/useForm";
 import useValidator from "../../utils/useValidator";
 import "./SignInPage.css";
@@ -35,61 +38,72 @@ const initialInputList = {
 
 const SignInPage = () => {
   const dispatch = useDispatch();
-  const { isAuthenticated, isAuthenticating } = useSelector(
+  const { isAuthenticated, error, isAuthenticating } = useSelector(
     (state) => state.auth
   );
 
   const {
-    inputList: { email, password },
+    inputList,
     handleOnInputChange,
     handleSubmitCallback,
     handleSetTouchedInput,
   } = useForm(initialInputList, handleLogin);
 
-  const { validateEmailFormat, validateEmptyField,combineValidation } = useValidator();
+  const { validateEmailFormat, validateEmptyField } = useValidator();
   const { validateAtLeastCharacterLength } = useValidator({ maxLength: 6 });
-
-    email.validators = [validateEmailFormat, validateEmptyField];
-    password.validators = [validateAtLeastCharacterLength];
-
-  function handleLogin() {
-    const user = {
-      email: email.value,
-      password: password.value,
-    };
+  const addValidatorsToInputList = () => {
+    inputList.email.validators = [
+      validateEmailFormat("Email is not valid"),
+      validateEmptyField("Field must be not empty"),
+    ];
+    inputList.password.validators = [
+      validateAtLeastCharacterLength("Field must be greater than 6")(6),
+    ];
+  };
+  useEffect(() => {
+    addValidatorsToInputList();
+  }, []);
+  useEffect(() => {
+    if (error) {
+      let i = setTimeout(() => {
+        dispatch(clearErrorMessage());
+        clearTimeout(i);
+      }, 3000);
+    }
+  }, [error]);
+  function handleLogin(user) {
     dispatch(handleLoginWithFirebase(user));
   }
   if (isAuthenticated) {
     return <Redirect to="/" />;
   }
+  const renderAuthInput = () => {
+    const output = [];
+    for (const input in inputList) {
+      const html = (
+        <AuthInput
+          error={inputList[input].error}
+          isTouched={inputList[input].isTouched}
+          handleSetTouchedInput={handleSetTouchedInput}
+          name={inputList[input].name}
+          handleOnInputChange={handleOnInputChange}
+          value={inputList[input].value}
+          type={inputList[input].type}
+          placeholder={inputList[input].placeholder}
+          labelIcon={inputList[input].labelIcon}
+          validateIcon={inputList[input].validateIcon}
+        />
+      );
+      output.push(html);
+    }
+    return output;
+  };
   return (
     <AuthenticateLayout title="Welcome back">
       {isAuthenticating ? <LoadingIcon /> : ""}
+      <p className="authError">{error ? error : " "}</p>
       <form onSubmit={handleSubmitCallback}>
-        <AuthInput
-          validate={combineValidation(email.validators)}
-          name={email.name}
-          handleSetTouchedInput={handleSetTouchedInput}
-          handleOnInputChange={handleOnInputChange}
-          value={email.value}
-          isTouched={email.isTouched}
-          type={email.type}
-          placeholder={email.placeholder}
-          labelIcon={email.labelIcon}
-          validateIcon={email.validateIcon}
-        />
-        <AuthInput
-          validate={combineValidation(password.validators)}
-          name={password.name}
-          handleSetTouchedInput={handleSetTouchedInput}
-          isTouched={password.isTouched}
-          handleOnInputChange={handleOnInputChange}
-          value={password.value}
-          type={password.type}
-          placeholder={password.placeholder}
-          labelIcon={password.labelIcon}
-          validateIcon={password.validateIcon}
-        />
+        {renderAuthInput()}
         <div>
           <NavLink className="forgotLink" to="#">
             Forgot password ?

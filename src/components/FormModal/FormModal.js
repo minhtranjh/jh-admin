@@ -14,7 +14,8 @@ const FormModal = ({
   handleSetTouchedInput,
   isContentLoading,
   clearForm,
-  combineValidation,
+  error,
+  isModalOpen,
 }) => {
   const renderInputList = () => {
     const output = [];
@@ -22,7 +23,7 @@ const FormModal = ({
       const i = (
         <FormInput
           handleSetTouchedInput={handleSetTouchedInput}
-          validate={combineValidation(inputList[input].validators)}
+          error={inputList[input].error}
           key={inputList[input].name}
           optionLabel={inputList[input].optionLabel}
           options={inputList[input].options ? inputList[input].options : []}
@@ -38,9 +39,10 @@ const FormModal = ({
     }
     return output;
   };
+  console.log(error);
   return (
     <>
-      {history.location.search !== "?form=true" ? (
+      {!isModalOpen ? (
         ""
       ) : (
         <Modal
@@ -48,22 +50,22 @@ const FormModal = ({
           onClose={() => {
             history.push({
               pathname: history.location.pathname,
-              state : undefined,
+              search: undefined,
             });
           }}
         >
           {!isContentLoading ? (
-            <form onSubmit={handleSubmitForm}>
-              {renderInputList()}
-              <div className="modalBtnGroup">
-                <Button type="submit" isBlue>
-                  Submit
-                </Button>
-                <Button type="button" onClick={clearForm}>
-                  Clear
-                </Button>
-              </div>
-            </form>
+              <form onSubmit={handleSubmitForm}>
+                {renderInputList()}
+                <div className="modalBtnGroup">
+                  <Button type="submit" isBlue>
+                    Submit
+                  </Button>
+                  <Button type="button" onClick={clearForm}>
+                    Clear
+                  </Button>
+                </div>
+              </form>
           ) : (
             <FormLoading />
           )}

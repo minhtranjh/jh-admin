@@ -8,6 +8,9 @@ const Topbar = () => {
         <div className="topBar">
             <SearchBar label="Search"/>
             <Avatar picture={avatar}/>
+            {/* <div className="profileDropdown">
+
+            </div> */}
         </div>
     );
 };

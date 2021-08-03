@@ -5,8 +5,10 @@ import { Link, useHistory, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import {
+  clearFilteredTeamList,
   createNewTeamToFirebase,
   editTeamDetailsToFirebase,
+  filterTeamList,
   getTeamDetailsByIdFromFirebase,
   getTeamListFromFirebase,
   removeTeamFromFirebase,
@@ -19,8 +21,14 @@ import FormModal from "../../components/FormModal/FormModal";
 import Table from "../../components/Table/Table";
 import FormLoading from "../../components/FormLoading/FormLoading";
 import FilterBar from "../../components/FilterBar/FilterBar";
-import { clearFilteredMemberList } from "../../redux/actions/member";
+import {
+  clearFilteredMemberList,
+  getListMembersFromFirebase,
+} from "../../redux/actions/member";
 import useFilter from "../../utils/useFilter";
+import useValidator from "../../utils/useValidator";
+import useQuery from "../../utils/useQuery";
+import { useRef } from "react";
 const tablePropertyList = [
   {
     label: "No.",
@@ -37,9 +45,7 @@ const tablePropertyList = [
   {
     label: "Leader",
     render: ({ rowData }) => {
-      return (
-        <span>{rowData.leader.lastName + " " + rowData.leader.firstName}</span>
-      );
+      return <span>{rowData.leader}</span>;
     },
   },
   {
@@ -50,11 +56,11 @@ const tablePropertyList = [
   },
   {
     label: "Action",
-    render: ({ rowData, handleRemoveItem, history }) => {
+    render: ({ rowData, rowHandlers, history }) => {
       return (
-        <div class="tableAction">
+        <div className="tableAction">
           <button
-            onClick={() => handleRemoveItem(rowData.id)}
+            onClick={() => rowHandlers.handleRemoveTeam(rowData.id)}
             className="tableWidgetBtn"
           >
             <i className="far fa-trash-alt"></i>
@@ -62,8 +68,7 @@ const tablePropertyList = [
           <Link
             to={{
               pathname: `${history.location?.pathname}`,
-              search: "?form=true",
-              state: rowData.id,
+              search: `?form=true&id=${rowData.id}`,
             }}
           >
             <button className="tableWidgetBtn">
@@ -104,13 +109,6 @@ const initialFilterList = {
     value: "",
     isOpen: false,
   },
-  createdAt: {
-    label: "Created At",
-    type: "date",
-    name: "createdAt",
-    value: "",
-    isOpen: false,
-  },
   leader: {
     label: "Leader",
     type: "radio",
@@ -123,57 +121,72 @@ const initialFilterList = {
 };
 const TeamPage = () => {
   const history = useHistory();
-
+  const firstRender = useRef(true);
   const dispatch = useDispatch();
   const params = useParams();
+  const query = useQuery();
   const {
     teamList,
     isLoading,
     isTeamDetailsLoading,
     teamDetails,
     isEditting,
+    filteredTeamList,
+    isFiltering,
     isDeleting,
     isCreating,
+    error,
   } = useSelector((state) => state.team);
-  const { isMemberDetailsLoading, memberList } = useSelector(
+  const { memberList, isLoading: isMemberListLoading } = useSelector(
     (state) => state.member
   );
   const {
     inputList,
     setInputList,
-    inputErrorList,
-    handleOnChange,
+    handleOnInputChange,
     handleSubmitCallback,
+    handleSetTouchedInput,
     clearInputForm,
-  } = useForm(initialInputList, validateInput, handleSubmitForm);
+    setValueToInputValue,
+  } = useForm(initialInputList, handleSubmitForm);
   const {
     filterList,
     setFilterList,
-    handleOnChange: handleOnChangeFilter,
-    handleSubmitCallback: handleOnAppyFilter,
+    handleCreateFilterObject,
+    handleOnChangeFilter,
+    handleOnAppyFilter,
   } = useFilter(initialFilterList, applyFilter);
-
-  function applyFilter() {
-    let searchParams = "search=true&";
-    const searchParamsTemp = "search=true&";
-    for (const filter in filterList) {
-      if (filterList[filter].isOpen) {
-        searchParams += `${filter}=${filterList[filter].value}&`;
-      }
-    }
-    if (searchParams === searchParamsTemp) {
-      history.push({
-        pathname: history.location.pathname,
-        state: history.location.state,
-      });
-      // return dispatch(clearFilteredMemberList());
-    }
+  const { validateEmptyField } = useValidator();
+  const clearFilterUrlParam = () => {
     history.push({
       pathname: history.location.pathname,
-      search: `?${searchParams}`,
-      state: history.location.state,
+      search: "",
     });
+  };
+  const pushFilterListToSearchParam = (filterListSearchParams) => {
+    history.push({
+      pathname: history.location.pathname,
+      search: `?${filterListSearchParams}`,
+    });
+  };
+  function applyFilter(filterListSearchParams) {
+    const filterListSearchParamsTemp = "search=true&";
+    if (filterListSearchParams === filterListSearchParamsTemp) {
+      clearFilterUrlParam();
+      dispatch(clearFilteredTeamList());
+      return;
+    }
+    pushFilterListToSearchParam(filterListSearchParams);
   }
+  useEffect(() => {
+    if (history.location.search && query.get("search") && !isLoading) {
+      const filterObj = handleCreateFilterObject();
+      if (teamList.length > 0) {
+        return dispatch(filterTeamList(filterObj));
+      }
+    }
+  }, [history.location.search, isLoading]);
+
   function handleRemoveTeam(id) {
     dispatch(removeTeamFromFirebase(id));
   }
@@ -181,49 +194,65 @@ const TeamPage = () => {
     dispatch(getTeamListFromFirebase());
   }, [dispatch]);
   useEffect(() => {
-    if (history.location.state) {
-      dispatch(getTeamDetailsByIdFromFirebase(history.location.state));
+    const id = query.get("id");
+    if (id && query.get("form")) {
+      dispatch(getTeamDetailsByIdFromFirebase(id));
     }
-  }, [history.location.state, dispatch]);
+  }, [history.location.search, dispatch]);
   useEffect(() => {
-    if (!isMemberDetailsLoading) {
-      const addMemberListValueToInputList = () => {
-        const newList = { ...inputList };
-        newList.leader.options = memberList;
-        setInputList(newList);
-      };
-      addMemberListValueToInputList();
-    }
-  }, [isMemberDetailsLoading]);
+    dispatch(getListMembersFromFirebase());
+  }, []);
+
   useEffect(() => {
-    if (!isTeamDetailsLoading) {
-      const addTeamDetailsValueToInputList = () => {
-        const newList = { ...inputList };
-        for (const input in newList) {
-          newList[input].value = teamDetails[input];
-        }
-        setInputList(newList);
-      };
-      addTeamDetailsValueToInputList();
+    inputList.name.validators = [validateEmptyField("Field must be not empty")];
+    inputList.leader.validators = [
+      validateEmptyField("Field must be not empty"),
+    ];
+  }, []);
+  useEffect(() => {
+    if (!isTeamDetailsLoading && JSON.stringify(teamDetails) != "{}") {
+      setValueToInputValue(teamDetails);
     }
   }, [isTeamDetailsLoading]);
-  function handleSubmitForm() {
-    if (!history.location.state) {
-      return dispatch(createNewTeamToFirebase(inputList));
+  useEffect(() => {
+    if (!isMemberListLoading) {
+      const newInputList = { ...inputList };
+      const newFilterList = { ...filterList };
+      newFilterList.leader.options = memberList;
+      newInputList.leader.options = memberList;
+      setFilterList(newFilterList);
+      setInputList(newInputList);
+    }
+  }, [isMemberListLoading]);
+  useEffect(() => {
+    updateSearchParams();
+  }, [isEditting, isCreating]);
+  function updateSearchParams() {
+    if (firstRender.current) {
+      firstRender.current = false;
+      history.push({
+        pathname: history.location.pathname,
+        search: history.location.search,
+      });
+      return;
+    }
+    if (!isEditting && !isCreating) {
+      history.push({
+        pathname: history.location.pathname,
+        search: undefined,
+      });
+    }
+  }
+  function handleSubmitForm(team) {
+    if (!query.get("id")) {
+      return dispatch(createNewTeamToFirebase(team));
     }
     return dispatch(
       editTeamDetailsToFirebase({
-        ...inputList,
-        id: history.location.state,
+        ...team,
+        id: query.get("id"),
       })
     );
-  }
-  function validateInput(fields = initialInputList) {
-    if ("name" in fields) {
-      inputErrorList.name =
-        fields.name.value.length <= 0 ? "This field must be not empty" : "";
-    }
-    return inputErrorList;
   }
   function checkIsLoadingToViewLoadingIcon() {
     return (
@@ -250,7 +279,6 @@ const TeamPage = () => {
               to={{
                 pathname: `${history.location.pathname}`,
                 search: "?form=true",
-                state: undefined,
               }}
               className="newBtn"
             >
@@ -262,29 +290,33 @@ const TeamPage = () => {
           <FilterBar
             filterList={filterList}
             setFilterList={setFilterList}
-            handleOnChange={handleOnChangeFilter}
+            handleOnChangeFilter={handleOnChangeFilter}
             handleOnApplyFilter={handleOnAppyFilter}
           />
           <Table
-            handleRemoveItem={handleRemoveTeam}
+            rowHandlers={{ handleRemoveTeam }}
             tablePropertyList={tablePropertyList}
-            tableDataList={teamList}
+            tableDataList={
+              !isFiltering && filteredTeamList.length <= 0
+                ? teamList
+                : filteredTeamList
+            }
           />
         </PageContent>
         {!isTeamDetailsLoading && (
           <FormModal
             title={
-              history.location.state
-                ? `Edit ${teamDetails.name} profile`
-                : "Create a new position"
+              query.get("id") ? `Edit team` : "Create a new team"
             }
+            isContentLoading={isTeamDetailsLoading}
             clearForm={clearInputForm}
-            isContentLoading={isMemberDetailsLoading}
+            handleSetTouchedInput={handleSetTouchedInput}
             handleSubmitForm={handleSubmitCallback}
-            inputErrorList={inputErrorList}
-            handleOnChange={handleOnChange}
+            handleOnInputChange={handleOnInputChange}
             inputList={inputList}
             history={history}
+            isModalOpen={!!query.get("form")}
+            error={error}
           />
         )}
       </div>

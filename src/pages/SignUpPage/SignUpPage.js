@@ -5,7 +5,10 @@ import AuthInput from "../../components/AuthInput/AuthInput";
 import Button from "../../components/Button/Button";
 import { NavLink, Redirect } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { handleSignUpWithFirebase } from "../../redux/actions/auth";
+import {
+  clearErrorMessage,
+  handleSignUpWithFirebase,
+} from "../../redux/actions/auth";
 import LoadingIcon from "../../components/LoadingIcon/LoadingIcon";
 import useValidator from "../../utils/useValidator";
 import { useEffect } from "react";
@@ -34,6 +37,15 @@ const initialInputList = {
     labelIcon: <i className="labelIcon far fa-envelope"></i>,
     validateIcon: <i className="validatedIcon fas fa-check"></i>,
   },
+
+  password: {
+    value: "",
+    placeholder: "Password",
+    name: "password",
+    type: "password",
+    labelIcon: <i className="labelIcon fas fa-lock"></i>,
+    validateIcon: <i className="validatedIcon far fa-eye"></i>,
+  },
   confirmPassword: {
     value: "",
     placeholder: "Confirm password",
@@ -43,132 +55,92 @@ const initialInputList = {
     labelIcon: <i className="far fa-check-circle"></i>,
     validateIcon: <i className="validatedIcon far fa-eye"></i>,
   },
-  password: {
-    value: "",
-    placeholder: "Password",
-    name: "password",
-    type: "password",
-    labelIcon: <i className="labelIcon fas fa-lock"></i>,
-    validateIcon: <i className="validatedIcon far fa-eye"></i>,
-  },
 };
 function SignOutPage() {
   const dispatch = useDispatch();
-  const { isAuthenticated, isAuthenticating } = useSelector(
+  const { isAuthenticated, error, isAuthenticating } = useSelector(
     (state) => state.auth
   );
   const {
-    inputList: { email, firstName, lastName, confirmPassword, password },
+    inputList,
     handleOnInputChange,
     handleSubmitCallback,
     handleSetTouchedInput,
   } = useForm(initialInputList, handleSignUp);
 
-  const { validateMatchedConfirmPassword } = useValidator({
-    password: password.value,
-  });
-  const { validateAtLeastCharacterLength } = useValidator({ maxLength: 6 });
-
-  const { validateEmptyField, validateEmailFormat, combineValidation } =
-    useValidator();
+  const {
+    validateAtLeastCharacterLength,
+    validateMatchedConfirmPassword,
+    validateEmptyField,
+    validateEmailFormat,
+  } = useValidator();
 
   useEffect(() => {
-    const addValidatorToInputList = () => {
-      firstName.validators = [validateEmptyField];
-      lastName.validators = [validateEmptyField];
-      email.validators = [validateEmailFormat, validateEmptyField];
-      password.validators = [validateAtLeastCharacterLength];
-    };
-    addValidatorToInputList();
+    inputList.firstName.validators = [
+      validateEmptyField("Field must be not empty"),
+    ];
+    inputList.lastName.validators = [
+      validateEmptyField("Field must be not empty"),
+    ];
+    inputList.email.validators = [
+      validateEmailFormat("Email is not valid"),
+      validateEmptyField("Field must be not empty"),
+    ];
+    inputList.password.validators = [
+      validateEmptyField("Field must be not empty"),
+      validateAtLeastCharacterLength("Field must more than 6 letters")(6),
+    ];
   }, []);
-
   useEffect(() => {
-    const addValidatorDepenedsOnValueToInputList = () => {
-      confirmPassword.validators = [
-        validateEmptyField,
-        validateMatchedConfirmPassword,
-      ];
-    };
-    addValidatorDepenedsOnValueToInputList()
-  }, [password.value]);
-
-  function handleSignUp() {
-    const user = {
-      email: email.value,
-      firstName: firstName.value,
-      lastName: lastName.value,
-      password: password.value,
-    };
+    inputList.confirmPassword.validators = [
+      validateEmptyField("Field must be not empty"),
+      validateMatchedConfirmPassword("Confirmed password is not matched")(
+        inputList.password.value
+      ),
+    ];
+  }, [inputList.password.value]);
+  useEffect(() => {
+    if (error) {
+      let i = setTimeout(() => {
+        dispatch(clearErrorMessage());
+        clearTimeout(i);
+      }, 3000);
+    }
+  }, [error]);
+  function handleSignUp(user) {
     dispatch(handleSignUpWithFirebase(user));
   }
+
   if (isAuthenticated) {
     return <Redirect to="/" />;
   }
+  const renderAuthInput = () => {
+    const output = [];
+    for (const input in inputList) {
+      const html = (
+        <AuthInput
+          error={inputList[input].error}
+          isTouched={inputList[input].isTouched}
+          handleSetTouchedInput={handleSetTouchedInput}
+          name={inputList[input].name}
+          handleOnInputChange={handleOnInputChange}
+          value={inputList[input].value}
+          type={inputList[input].type}
+          placeholder={inputList[input].placeholder}
+          labelIcon={inputList[input].labelIcon}
+          validateIcon={inputList[input].validateIcon}
+        />
+      );
+      output.push(html);
+    }
+    return output;
+  };
   return (
     <AuthenticateLayout title="Create a account">
       {isAuthenticating ? <LoadingIcon /> : ""}
       <form onSubmit={handleSubmitCallback}>
-        <AuthInput
-          validate={combineValidation(firstName.validators)}
-          isTouched={firstName.isTouched}
-          handleSetTouchedInput={handleSetTouchedInput}
-          name={firstName.name}
-          handleOnInputChange={handleOnInputChange}
-          value={firstName.value}
-          type={firstName.type}
-          placeholder={firstName.placeholder}
-          labelIcon={firstName.labelIcon}
-          validateIcon={firstName.validateIcon}
-        />
-        <AuthInput
-          validate={combineValidation(lastName.validators)}
-          isTouched={lastName.isTouched}
-          handleSetTouchedInput={handleSetTouchedInput}
-          name={lastName.name}
-          handleOnInputChange={handleOnInputChange}
-          value={lastName.value}
-          type={lastName.type}
-          placeholder={lastName.placeholder}
-          labelIcon={lastName.labelIcon}
-          validateIcon={lastName.validateIcon}
-        />
-        <AuthInput
-          validate={combineValidation(email.validators)}
-          isTouched={email.isTouched}
-          handleSetTouchedInput={handleSetTouchedInput}
-          name={email.name}
-          handleOnInputChange={handleOnInputChange}
-          value={email.value}
-          type={email.type}
-          placeholder={email.placeholder}
-          labelIcon={email.labelIcon}
-          validateIcon={email.validateIcon}
-        />
-        <AuthInput
-          validate={combineValidation(password.validators)}
-          isTouched={password.isTouched}
-          handleSetTouchedInput={handleSetTouchedInput}
-          name={password.name}
-          handleOnInputChange={handleOnInputChange}
-          value={password.value}
-          type={password.type}
-          placeholder={password.placeholder}
-          labelIcon={password.labelIcon}
-          validateIcon={password.validateIcon}
-        />
-        <AuthInput
-          validate={combineValidation(confirmPassword.validators)}
-          isTouched={confirmPassword.isTouched}
-          handleSetTouchedInput={handleSetTouchedInput}
-          name={confirmPassword.name}
-          handleOnInputChange={handleOnInputChange}
-          value={confirmPassword.value}
-          type={confirmPassword.type}
-          placeholder={confirmPassword.placeholder}
-          labelIcon={confirmPassword.labelIcon}
-          validateIcon={confirmPassword.validateIcon}
-        />
-
+        <p className="authError">{error ? error : " "}</p>
+        {renderAuthInput()}
         <div className="authButtonGroup">
           <Button isGreen={true}>Sign Up</Button>
           <div className="seperationButton">

@@ -75,7 +75,7 @@ const FilterBar = ({
     <form onSubmit={handleOnApplyFilter} className="filterBar">
       {renderListFilter()}
       <div onClick={toggleListFilterDropdown} className="filterItem addFilter">
-        <i class="fas fa-plus"></i>
+        <i className="fas fa-plus"></i>
         <div
           ref={dropdownRef}
           onClick={(e) => e.stopPropagation()}

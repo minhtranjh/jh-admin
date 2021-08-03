@@ -71,11 +71,33 @@
 	height: 100%;
 	text-align: center;
 }
+.activeColumn{
+	display:flex;
+	align-items: center;
+	justify-content:center;
+}
+.activeColumn p{
+	margin-right: 5px;
+}
+.passwordColumn{
+	text-align: left;
+	border: none;
+	outline: none;
+	background-color:transparent;
+}
 .memberName p:last-child{
 	font-size: 11px;
 	margin: 3px 0;
 }
 @media(max-width: 1024px){
+	.passwordColumn{
+	text-align: right;
+
+	}
+	.activeColumn{
+	justify-content:flex-end;
+
+	}
 	.infoBox{
 		justify-content:flex-end;
 		flex-direction: column;

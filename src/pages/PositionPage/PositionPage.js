@@ -10,8 +10,10 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import {
+  clearFilterPositionList,
   createNewPositionToFirebase,
   editPositionDetailsToFirebase,
+  filterListPosition,
   getPositionDetailsByIdFromFirebase,
   getPositionListFromFirebase,
   removePositionFromFirebase,
@@ -21,6 +23,8 @@ import FormLoading from "../../components/FormLoading/FormLoading";
 import FilterBar from "../../components/FilterBar/FilterBar";
 import useFilter from "../../utils/useFilter";
 import useValidator from "../../utils/useValidator";
+import useQuery from "../../utils/useQuery";
+import { useRef } from "react";
 const tablePropertyList = [
   {
     label: "No.",
@@ -42,11 +46,11 @@ const tablePropertyList = [
   },
   {
     label: "Action",
-    render: ({ rowData, history, handleRemoveItem }) => {
+    render: ({ rowData, history, rowHandlers }) => {
       return (
-        <div class="tableAction">
+        <div className="tableAction">
           <button
-            onClick={() => handleRemoveItem(rowData.id)}
+            onClick={() => rowHandlers.handleRemovePosition(rowData.id)}
             className="tableWidgetBtn"
           >
             <i className="far fa-trash-alt"></i>
@@ -54,8 +58,7 @@ const tablePropertyList = [
           <Link
             to={{
               pathname: `${history.location?.pathname}`,
-              search: "?form=true",
-              state: rowData.id,
+              search: `?form=true&id=${rowData.id}`,
             }}
           >
             <button className="tableWidgetBtn">
@@ -76,9 +79,8 @@ const initialInputList = {
     placeholder: "Position name",
     name: "name",
     type: "text",
-    isTouched : false,
+    isTouched: false,
   },
-
 };
 const initialFilterList = {
   name: {
@@ -92,6 +94,7 @@ const initialFilterList = {
 const PositionPage = () => {
   const history = useHistory();
   const dispatch = useDispatch();
+  const query = useQuery();
   const params = useParams();
   const {
     positionList,
@@ -99,8 +102,11 @@ const PositionPage = () => {
     isPositionDetailsLoading,
     positionDetails,
     isEditting,
+    filteredPositionList,
+    isFiltering,
     isDeleting,
     isCreating,
+    error
   } = useSelector((state) => state.position);
   const {
     inputList,
@@ -108,67 +114,98 @@ const PositionPage = () => {
     handleOnInputChange,
     handleSubmitCallback,
     clearInputForm,
-    handleSetTouchedInput
+    handleSetTouchedInput,
   } = useForm(initialInputList, handleSubmitForm);
   const {
     filterList,
     setFilterList,
+    handleCreateFilterObject,
     handleOnChangeFilter,
     handleOnAppyFilter,
   } = useFilter(initialFilterList, applyFilter);
-  const {validateEmptyField,combineValidation} = useValidator()
+  const firstRender = useRef(true);
+  const { validateEmptyField } = useValidator();
   useEffect(() => {
-    inputList.name.validators = [validateEmptyField]
-  },[])
-  function applyFilter() {
-    let searchParams = "search=true&";
-    const searchParamsTemp = "search=true&";
-    for (const filter in filterList) {
-      if (filterList[filter].isOpen) {
-        searchParams += `${filter}=${filterList[filter].value}&`;
+    inputList.name.validators = [validateEmptyField("Field must be not empty")];
+  }, []);
+  useEffect(() => {
+    const handleFilterMemberList = () => {
+      if (history.location.search && query.get("search") && !isLoading) {
+        const filterObj = handleCreateFilterObject();
+        if (positionList.length > 0) {
+          return dispatch(filterListPosition(filterObj));
+        }
       }
-    }
-    if (searchParams === searchParamsTemp) {
-      history.push({
-        pathname: history.location.pathname,
-        state: history.location.state,
-      });
-      // return dispatch(clear());
-    }
-    history.push({
-      pathname: history.location.pathname,
-      search: `?${searchParams}`,
-      state: history.location.state,
-    });
-  }
+    };
+    handleFilterMemberList();
+  }, [history.location.search, isLoading]);
   useEffect(() => {
     dispatch(getPositionListFromFirebase());
   }, [dispatch]);
   useEffect(() => {
-    if (history.location.state) {
-      dispatch(getPositionDetailsByIdFromFirebase(history.location.state));
+    const id = query.get("id");
+    if (id && query.get("form")) {
+      dispatch(getPositionDetailsByIdFromFirebase(id));
     }
-  }, [history.location.state, dispatch]);
+  }, [history.location.search]);
   useEffect(() => {
     if (!isPositionDetailsLoading) {
-      const addMemberDetailsValueToInputList = () => {
-        const newList = { ...inputList };
-        for (const input in newList) {
-          newList[input].value = positionDetails[input];
-        }
-        setInputList(newList);
-      };
-      addMemberDetailsValueToInputList();
+      const newList = { ...inputList };
+      for (const input in newList) {
+        newList[input].value = positionDetails[input];
+      }
+      setInputList(newList);
     }
   }, [isPositionDetailsLoading]);
-  function handleSubmitForm() {
-    if (!history.location.state) {
+  useEffect(() => {
+    updateSearchParams();
+  }, [isEditting, isCreating]);
+  function updateSearchParams() {
+    if (firstRender.current) {
+      firstRender.current = false;
+      history.push({
+        pathname: history.location.pathname,
+        search: history.location.search,
+      });
+      return;
+    }
+    if (!isEditting && !isCreating) {
+      history.push({
+        pathname: history.location.pathname,
+        search: undefined,
+      });
+    }
+  }
+  const clearFilterUrlParam = () => {
+    history.push({
+      pathname: history.location.pathname,
+      search: "",
+    });
+  };
+  const pushFilterListToSearchParam = (filterListSearchParams) => {
+    history.push({
+      pathname: history.location.pathname,
+      search: `?${filterListSearchParams}`,
+    });
+  };
+  function applyFilter(filterListSearchParams) {
+    const filterListSearchParamsTemp = "search=true&";
+    if (filterListSearchParams === filterListSearchParamsTemp) {
+      clearFilterUrlParam();
+      dispatch(clearFilterPositionList());
+      return;
+    }
+    pushFilterListToSearchParam(filterListSearchParams);
+  }
+
+  function handleSubmitForm(positionList) {
+    if (!query.get("id")) {
       return dispatch(createNewPositionToFirebase(inputList));
     }
     return dispatch(
       editPositionDetailsToFirebase({
-        ...inputList,
-        id: history.location.state,
+        ...positionList,
+        id: query.get("id"),
       })
     );
   }
@@ -200,7 +237,6 @@ const PositionPage = () => {
               to={{
                 pathname: `${history.location.pathname}`,
                 search: "?form=true",
-                state: undefined,
               }}
               className="newBtn"
             >
@@ -216,26 +252,32 @@ const PositionPage = () => {
             handleOnApplyFilter={handleOnAppyFilter}
           />
           <Table
-            handleRemoveItem={handleRemovePosition}
+            rowHandlers={{ handleRemovePosition }}
             tablePropertyList={tablePropertyList}
-            tableDataList={positionList}
+            tableDataList={
+              !isFiltering && filteredPositionList.length <= 0
+                ? positionList
+                : filteredPositionList
+            }
           />
         </PageContent>
         {!isPositionDetailsLoading && (
           <FormModal
             title={
-              history.location.state
-                ? `Edit ${positionDetails.name} profile`
+              query.get("id")
+                ? `Edit position`
                 : "Create a new position"
             }
             isContentLoading={isPositionDetailsLoading}
             clearForm={clearInputForm}
             handleSetTouchedInput={handleSetTouchedInput}
             handleSubmitForm={handleSubmitCallback}
-            combineValidation={combineValidation}
             handleOnInputChange={handleOnInputChange}
             inputList={inputList}
             history={history}
+            isModalOpen={!!query.get("form")}
+            error={error}
+
           />
         )}
       </div>

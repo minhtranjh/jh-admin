@@ -12,17 +12,18 @@ const FormInput = ({
   optionLabel,
   options,
   isTouched,
-  validate,
+  error,
   handleSetTouchedInput,
 }) => {
   const imageRef = useRef(null);
   const inputRef = useRef(null);
+  
   const inputMap = {
     text: {
       render: () => (
         <div className="formInputGroup">
           <p className="formInputError">
-            {isTouched && validate({ label: placeholder, value })}
+            {isTouched && error}
           </p>
           <input
             onBlur={handleSetTouchedInput}
@@ -37,11 +38,46 @@ const FormInput = ({
         </div>
       ),
     },
+    password: {
+      render: () => (
+        <div className="formInputGroup">
+          <p className="formInputError">
+            {isTouched && error}
+          </p>
+          <input
+            onBlur={handleSetTouchedInput}
+            autoComplete={"off"}
+            className="formInput"
+            type={type}
+            name={name}
+            placeholder={placeholder}
+            value={value}
+            onChange={onChange}
+          />
+        </div>
+      ),
+    },
+    checkbox: {
+      render: () => (
+        <div className="formInput radio">
+          <input
+            onBlur={handleSetTouchedInput}
+            onChange={onChange}
+            id={`htmlCheckboxInput`}
+            name={name}
+            value={value}
+            checked={value}
+            type="checkbox"
+          />
+          <label htmlFor={`htmlCheckboxInput`}>{placeholder}</label>
+        </div>
+      ),
+    },
     email: {
       render: () => (
         <div className="formInputGroup">
           <p className="formInputError">
-            {isTouched && validate({ label: placeholder, value })}
+            {isTouched && error}
           </p>
           <input
             onBlur={handleSetTouchedInput}
@@ -60,7 +96,7 @@ const FormInput = ({
       render: () => (
         <div className="inputDate formInputGroup">
           <p className="formInputError">
-            {isTouched && validate({ label: placeholder, value })}
+            {isTouched && error}
           </p>
 
           <input
@@ -101,9 +137,8 @@ const FormInput = ({
         return (
           <div className="formInputGroup">
             <p className="formInputError">
-              {isTouched && validate({ label: placeholder, value })}
+              {isTouched && error}
             </p>
-
             <select
               name={name}
               value={value}
@@ -126,7 +161,7 @@ const FormInput = ({
       render: () => (
         <div className="formInputGroup">
           <p className="formInputError">
-            {isTouched && validate({ label: placeholder, value })}
+            {isTouched && error}
           </p>
           <textarea
             onChange={onChange}
@@ -143,7 +178,7 @@ const FormInput = ({
       render: () => (
         <div className="radioInputGroup formInputGroup">
           <p className="formInputError">
-            {isTouched && validate({ label: placeholder, value })}
+            {isTouched && error}
           </p>
           {options.map((op) => {
             return (
@@ -180,19 +215,18 @@ const FormInput = ({
       setImage();
     };
   }, [type]);
-  useEffect(() => {
 
+  useEffect(() => {
     const showImageFromInputFile = () => {
       if (type === "file") {
-      debugger
         if (value === "") {
           imageRef.current.style.display = "none";
           return (imageRef.current.src = "");
         }
-        
+
         if (value) {
           imageRef.current.style.display = "initial";
-          if(typeof value==="string"){
+          if (typeof value === "string") {
             return (imageRef.current.src = value);
           }
           return (imageRef.current.src = URL.createObjectURL(value));
