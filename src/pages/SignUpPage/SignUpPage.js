@@ -3,7 +3,7 @@ import AuthenticateLayout from "../../components/AuthenticateLayout/Authenticate
 import useForm from "../../utils/useForm";
 import AuthInput from "../../components/AuthInput/AuthInput";
 import Button from "../../components/Button/Button";
-import { NavLink, Redirect } from "react-router-dom";
+import { NavLink, Redirect, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   clearErrorMessage,
@@ -58,9 +58,10 @@ const initialInputList = {
 };
 function SignOutPage() {
   const dispatch = useDispatch();
-  const { isAuthenticated, error, isAuthenticating } = useSelector(
+  const { isSigningUp, isSignUpSuccess, error, message } = useSelector(
     (state) => state.auth
   );
+  const history = useHistory();
   const {
     inputList,
     handleOnInputChange,
@@ -107,18 +108,24 @@ function SignOutPage() {
       }, 3000);
     }
   }, [error]);
+  useEffect(() => {
+    if (isSigningUp) {
+      let i = setTimeout(() => {
+        history.push("/login");
+        clearTimeout(i);
+      }, 3000);
+    }
+  }, [isSigningUp]);
   function handleSignUp(user) {
     dispatch(handleSignUpWithFirebase(user));
   }
 
-  if (isAuthenticated) {
-    return <Redirect to="/" />;
-  }
   const renderAuthInput = () => {
     const output = [];
     for (const input in inputList) {
       const html = (
         <AuthInput
+          key={inputList[input].name}
           error={inputList[input].error}
           isTouched={inputList[input].isTouched}
           handleSetTouchedInput={handleSetTouchedInput}
@@ -137,9 +144,11 @@ function SignOutPage() {
   };
   return (
     <AuthenticateLayout title="Create a account">
-      {isAuthenticating ? <LoadingIcon /> : ""}
+      {isSigningUp ? <LoadingIcon /> : ""}
       <form onSubmit={handleSubmitCallback}>
         <p className="authError">{error ? error : " "}</p>
+        <p className="authMessage">{message ? message : " "}</p>
+
         {renderAuthInput()}
         <div className="authButtonGroup">
           <Button isGreen={true}>Sign Up</Button>

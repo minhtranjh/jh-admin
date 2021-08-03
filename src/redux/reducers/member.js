@@ -36,7 +36,7 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         ...action.payload,
-        error : "",
+        error: "",
         isLoading: false,
       };
       return state;
@@ -51,14 +51,14 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         isCreating: true,
+        message: "",
       };
       return state;
     case `${memberConstants.CREATE_NEW_MEMBER}_SUCCESS`:
       state = {
         ...state,
         ...action.payload,
-        error : "",
-
+        error: "",
         isCreating: false,
       };
       return state;
@@ -66,6 +66,7 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         ...action.payload,
+        message: "",
         isCreating: false,
       };
       return state;
@@ -82,8 +83,7 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         memberDetails: result ? result : {},
-        error : "",
-
+        error: "",
         isMemberDetailsLoading: false,
       };
       return state;
@@ -101,7 +101,7 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         ...action.payload,
-        error : "",
+        error: "",
 
         memberDetailsTempList: newArr,
         isMemberDetailsLoading: false,
@@ -118,13 +118,14 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         isEditting: true,
+        message: "",
       };
       return state;
     case `${memberConstants.EDIT_MEMBER_DETAILS}_SUCCESS`:
       state = {
         ...state,
         ...action.payload,
-        error : "",
+        error: "",
 
         isEditting: false,
       };
@@ -133,6 +134,7 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         ...action.payload,
+        message: "",
         isEditting: false,
       };
       return state;
@@ -140,6 +142,7 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         ...action.payload,
+        message: "",
         isDeleting: true,
       };
       return state;
@@ -147,8 +150,7 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         ...action.payload,
-        error : "",
-
+        error: "",
         isDeleting: false,
       };
       return state;
@@ -156,7 +158,8 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         ...action.payload,
-        isDeleting: true,
+        message: "",
+        isDeleting: false,
       };
       return state;
     case `${memberConstants.FILTER_MEMBER}_SUCCESS`:
@@ -166,7 +169,7 @@ export default (state = initialState, action) => {
         ...state,
         isFiltering: true,
 
-        error : "",
+        error: "",
 
         filteredMemberList: newMemberList,
       };
@@ -175,8 +178,7 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         filteredMemberList: [],
-        error : "",
-
+        error: "",
         isFiltering: false,
       };
       return state;

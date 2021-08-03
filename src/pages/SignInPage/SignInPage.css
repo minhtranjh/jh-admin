@@ -39,3 +39,9 @@ a {
   font-weight: bold;
   margin: 10px 0 20px 0;
 }
+.authMessage{
+  color: rgb(48, 75, 38);
+  font-size: 15px;
+  font-weight: bold;
+  margin: 10px 0 20px 0;
+}

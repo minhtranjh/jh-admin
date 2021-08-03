@@ -82,6 +82,7 @@ const SignInPage = () => {
     for (const input in inputList) {
       const html = (
         <AuthInput
+        key={inputList[input].name}
           error={inputList[input].error}
           isTouched={inputList[input].isTouched}
           handleSetTouchedInput={handleSetTouchedInput}

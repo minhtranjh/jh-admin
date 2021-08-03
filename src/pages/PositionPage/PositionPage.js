@@ -25,6 +25,7 @@ import useFilter from "../../utils/useFilter";
 import useValidator from "../../utils/useValidator";
 import useQuery from "../../utils/useQuery";
 import { useRef } from "react";
+import NotifyDialog from "../../components/NotifyDialog/NotifyDialog";
 const tablePropertyList = [
   {
     label: "No.",
@@ -106,7 +107,8 @@ const PositionPage = () => {
     isFiltering,
     isDeleting,
     isCreating,
-    error
+    error,
+    message
   } = useSelector((state) => state.position);
   const {
     inputList,
@@ -224,6 +226,8 @@ const PositionPage = () => {
   return (
     <>
       {!checkIsLoadingToViewLoadingIcon() ? <FormLoading /> : ""}
+      <NotifyDialog message={message} error={error}/>
+
       <div className="positionPage">
         <PageTitle
           description="Manage position"

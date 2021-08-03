@@ -31,6 +31,7 @@ import useFilter from "../../utils/useFilter";
 import useValidator from "../../utils/useValidator";
 import { useRef } from "react";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import NotifyDialog from "../../components/NotifyDialog/NotifyDialog";
 const tablePropertyList = [
   {
     label: "No.",
@@ -410,6 +411,7 @@ const MemberPage = (props) => {
   return (
     <>
       {!checkIsLoadingToViewLoadingIcon() ? <FormLoading /> : ""}
+      <NotifyDialog message={member.message} error={member.error}/>
       <div className="memberPage">
         <PageTitle
           description="Manage member"
@@ -419,7 +421,6 @@ const MemberPage = (props) => {
         />
         <PageContent>
           <div className="searchBarWrapper">
-
             <Link
               to={{
                 pathname: `${history.location.pathname}`,

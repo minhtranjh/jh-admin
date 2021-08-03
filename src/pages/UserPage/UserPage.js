@@ -27,6 +27,7 @@ import FormLoading from "../../components/FormLoading/FormLoading";
 import useQuery from "../../utils/useQuery";
 import { useRef } from "react";
 import { removeMemberFromFirebase } from "../../redux/actions/member";
+import NotifyDialog from "../../components/NotifyDialog/NotifyDialog";
 const tablePropertyList = [
   {
     label: "No.",
@@ -209,7 +210,8 @@ const UserPage = () => {
     userDetails,
     isDeleting,
     filteredUserList,
-    error
+    error,
+    message,
   } = useSelector((state) => state.user);
   const {
     inputList,
@@ -291,7 +293,7 @@ const UserPage = () => {
     dispatch(createNewUserToFirebase(user));
   }
   function handleRemoveUser(id) {
-    dispatch(removeMemberFromFirebase(id))
+    dispatch(removeMemberFromFirebase(id));
   }
   useEffect(() => {
     updateSearchParams();
@@ -354,6 +356,7 @@ const UserPage = () => {
   return (
     <>
       {!checkIsLoadingToViewLoadingIcon() && <FormLoading />}
+      <NotifyDialog message={message} error={error} />
       <div className="userPage">
         <PageTitle
           title="User"

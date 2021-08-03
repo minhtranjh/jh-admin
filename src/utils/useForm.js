@@ -60,7 +60,6 @@ const useForm = (initialInputList, submitCallback) => {
         inputValidCount++;
       }
     }
-    console.log(newInputList);
     if (length === inputValidCount) {
       submitCallback(inputValue);
     } else {

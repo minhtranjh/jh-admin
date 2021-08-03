@@ -29,6 +29,7 @@ import useFilter from "../../utils/useFilter";
 import useValidator from "../../utils/useValidator";
 import useQuery from "../../utils/useQuery";
 import { useRef } from "react";
+import NotifyDialog from "../../components/NotifyDialog/NotifyDialog";
 const tablePropertyList = [
   {
     label: "No.",
@@ -136,6 +137,7 @@ const TeamPage = () => {
     isDeleting,
     isCreating,
     error,
+    message
   } = useSelector((state) => state.team);
   const { memberList, isLoading: isMemberListLoading } = useSelector(
     (state) => state.member
@@ -266,6 +268,7 @@ const TeamPage = () => {
   return (
     <>
       {!checkIsLoadingToViewLoadingIcon() ? <FormLoading /> : ""}
+      <NotifyDialog message={message} error={error}/>
       <div className="teamPage">
         <PageTitle
           title=" Team"

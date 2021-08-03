@@ -5,6 +5,8 @@ const initialState = {
   firstName: "",
   lastName: "",
   isAuthenticating: false,
+  isSigningUp: false,
+  isSignUpSuccess : false,
   isAuthenticated: false,
   isLogggingout: false,
   message: "",
@@ -24,7 +26,6 @@ export default (state = initialState, action) => {
         ...action.payload,
         isAuthenticated: true,
         error: "",
-
         isAuthenticating: false,
       };
       return state;
@@ -39,24 +40,27 @@ export default (state = initialState, action) => {
     case `${authConstants.USER_SIGNUP}_REQUEST`:
       state = {
         ...state,
-        isAuthenticating: true,
+        isSigningUp: true,
+        isSignUpSuccess:false,
       };
       return state;
     case `${authConstants.USER_SIGNUP}_SUCCESS`:
       state = {
         ...state,
         ...action.payload,
-        isAuthenticated: true,
         error: "",
-
-        isAuthenticating: false,
+        isSignUpSuccess:true,
+        isSigningUp: false,
       };
+      return state;
     case `${authConstants.USER_SIGNUP}_FAILED`:
       state = {
         ...state,
         ...action.payload,
-        isAuthenticated: false,
-        isAuthenticating: false,
+        message: "",
+        isSignUpSuccess:false,
+
+        isSigningUp: false,
       };
       return state;
     case `${authConstants.USER_LOGOUT}_REQUEST`:

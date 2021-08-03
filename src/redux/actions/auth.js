@@ -88,10 +88,9 @@ const handleSignUpWithFirebase = ({ email, password, firstName, lastName }) => {
       });
       dispatch({
         type: `${authConstants.USER_SIGNUP}_SUCCESS`,
-        payload: { unSubSignUp },
+        payload: { unSubSignUp,  message : "Sign up successfully"},
       });
     } catch (error) {
-      console.log(error);
       dispatch({
         type: `${authConstants.USER_SIGNUP}_FAILED`,
         payload: {
