@@ -200,13 +200,13 @@ const PositionPage = () => {
     pushFilterListToSearchParam(filterListSearchParams);
   }
 
-  function handleSubmitForm(positionList) {
+  function handleSubmitForm(position) {
     if (!query.get("id")) {
-      return dispatch(createNewPositionToFirebase(inputList));
+      return dispatch(createNewPositionToFirebase(position));
     }
     return dispatch(
       editPositionDetailsToFirebase({
-        ...positionList,
+        ...position,
         id: query.get("id"),
       })
     );

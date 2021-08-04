@@ -18,11 +18,28 @@ const getUserByField = async (field, value) => {
   });
   return user;
 };
+const onDispatchLoginRequest = () => {
+  return {
+    type: `${authConstants.USER_LOGIN}_REQUEST`,
+  };
+};
+const onDispatchLoginSuccess = (user) => {
+  return {
+    type: `${authConstants.USER_LOGIN}_SUCCESS`,
+    payload: { user, message: "Login successfully" },
+  };
+};
+const onDispatchLoginFailed = (error) => {
+  return {
+    type: `${authConstants.USER_LOGIN}_FAILED`,
+    payload: {
+      error: error,
+    },
+  };
+};
 const handleLoginWithFirebase = ({ email, password }) => {
   return async (dispatch) => {
-    dispatch({
-      type: `${authConstants.USER_LOGIN}_REQUEST`,
-    });
+    dispatch(onDispatchLoginRequest());
     const user = await getUserByField("email", email);
     if (user) {
       if (user.isActive) {
@@ -36,41 +53,46 @@ const handleLoginWithFirebase = ({ email, password }) => {
               email: currentUser.email,
             };
             localStorage.setItem("currentUser", JSON.stringify(user));
-            dispatch({
-              type: `${authConstants.USER_LOGIN}_SUCCESS`,
-              payload: { user, message: "Login successfully" },
-            });
+            dispatch(onDispatchLoginSuccess(user));
             return;
           })
           .catch((error) => {
-            dispatch({
-              type: `${authConstants.USER_LOGIN}_FAILED`,
-              payload: {
-                error: error.message,
-              },
-            });
+            dispatch(onDispatchLoginFailed(error.message));
             return;
           });
       } else {
-        dispatch({
-          type: `${authConstants.USER_LOGIN}_FAILED`,
-          payload: { error: "User has no permission to login" },
-        });
+        dispatch(
+          onDispatchLoginFailed("User does not have permission to log in")
+        );
         return;
       }
     } else {
-      dispatch({
-        type: `${authConstants.USER_LOGIN}_FAILED`,
-        payload: { error: "User doesn't exists" },
-      });
+      dispatch(onDispatchLoginFailed("User doesn't exists"));
     }
+  };
+};
+const onDispatchSignUpRequest = () => {
+  return {
+    type: `${authConstants.USER_SIGNUP}_REQUEST`,
+  };
+};
+const onDispatchSignUpSuccess = (payload) => {
+  return {
+    type: `${authConstants.USER_SIGNUP}_SUCCESS`,
+    payload: { ...payload },
+  };
+};
+const onDisptachSignUpFailed = (error) => {
+  return {
+    type: `${authConstants.USER_SIGNUP}_FAILED`,
+    payload: {
+      error: error,
+    },
   };
 };
 const handleSignUpWithFirebase = ({ email, password, firstName, lastName }) => {
   return async (dispatch) => {
-    dispatch({
-      type: `${authConstants.USER_SIGNUP}_REQUEST`,
-    });
+    dispatch(onDispatchSignUpRequest());
     try {
       await auth.createUserWithEmailAndPassword(email, password);
       const displayName = `${firstName} ${lastName}`;
@@ -86,44 +108,66 @@ const handleSignUpWithFirebase = ({ email, password, firstName, lastName }) => {
         isActive: false,
         createdAt: new Date(),
       });
-      dispatch({
-        type: `${authConstants.USER_SIGNUP}_SUCCESS`,
-        payload: { unSubSignUp,  message : "Sign up successfully"},
-      });
+      dispatch(
+        onDispatchSignUpSuccess({
+          unSubSignUp,
+          message: "Sign up successfully",
+        })
+      );
     } catch (error) {
-      dispatch({
-        type: `${authConstants.USER_SIGNUP}_FAILED`,
-        payload: {
-          error: error.message,
-        },
-      });
+      dispatch(onDisptachSignUpFailed(error.message));
     }
+  };
+};
+const onDispatchLogoutRequest = () => {
+  return {
+    type: `${authConstants.USER_LOGOUT}_REQUEST`,
+  };
+};
+const onDispatchLogoutSuccess = () => {
+  return {
+    type: `${authConstants.USER_LOGOUT}_SUCCESS`,
+    payload: {
+      message: "Logout successfully",
+    },
+  };
+};
+const onDispatchLogoutFailed = (error) => {
+  return {
+    type: `${authConstants.USER_LOGOUT}_FAILED`,
+    payload: {
+      error: error,
+    },
   };
 };
 const logOutWithFirebase = () => {
   return async (dispatch) => {
-    dispatch({
-      type: `${authConstants.USER_LOGOUT}_REQUEST`,
-    });
+    dispatch(onDispatchLogoutRequest());
     auth
       .signOut()
       .then(() => {
         localStorage.removeItem("currentUser");
-        dispatch({
-          type: `${authConstants.USER_LOGOUT}_SUCCESS`,
-          payload: {
-            message: "Logout successfully",
-          },
-        });
+        dispatch(onDispatchLogoutSuccess());
       })
       .catch((error) => {
-        dispatch({
-          type: `${authConstants.USER_LOGOUT}_FAILED`,
-          payload: {
-            error: error.message,
-          },
-        });
+        dispatch(onDispatchLogoutFailed(error.message));
       });
+  };
+};
+const onDispatchCheckUserLoggedInFailed = (error) => {
+  return {
+    type: `${authConstants.USER_LOGIN}_FAILED`,
+    payload: {
+      error,
+    },
+  };
+};
+const onDispatchCheckUserLoggedInSuccess = (user) => {
+  return {
+    type: `${authConstants.USER_LOGIN}_SUCCESS`,
+    payload: {
+      user,
+    },
   };
 };
 const checkIfUserLoggedIn = () => {
@@ -133,40 +177,29 @@ const checkIfUserLoggedIn = () => {
       : null;
     if (!currentUser) {
       localStorage.removeItem("currentUser");
-      return dispatch({
-        type: `${authConstants.USER_LOGIN}_FAILED`,
-        payload: {
-          error: "",
-        },
-      });
+      return dispatch(onDispatchCheckUserLoggedInFailed(""));
     }
     auth.onAuthStateChanged((currentUser) => {
       if (currentUser) {
-        return dispatch({
-          type: `${authConstants.USER_LOGIN}_SUCCESS`,
-          payload: {
-            user: {
-              displayName: currentUser.displayName,
-              id: currentUser.uid,
-              email: currentUser.email,
-            },
-          },
-        });
+        const user = {
+          displayName: currentUser.displayName,
+          id: currentUser.uid,
+          email: currentUser.email,
+        };
+        return dispatch(onDispatchCheckUserLoggedInSuccess(user));
       }
-      return dispatch({
-        type: `${authConstants.USER_LOGIN}_FAILED`,
-        payload: {
-          error: "Login again",
-        },
-      });
+      return dispatch(onDispatchCheckUserLoggedInFailed("Login again"));
     });
+  };
+};
+const onDispatchClearErrorSuccess = () => {
+  return {
+    type: `${authConstants.CLEAR_ERROR_MESSAGE}_SUCCESS`,
   };
 };
 const clearErrorMessage = () => {
   return async (dispatch) => {
-    dispatch({
-      type: `${authConstants.CLEAR_ERROR_MESSAGE}_SUCCESS`,
-    });
+    dispatch(onDispatchClearErrorSuccess());
   };
 };
 export {

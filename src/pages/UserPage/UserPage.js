@@ -17,6 +17,7 @@ import {
   filterUserList,
   getUserDetailsFromFirebase,
   getUserListFromFirebase,
+  removeUserFromFirebase,
   unActiveUserToFirebase,
 } from "../../redux/actions/user";
 import { useSelector } from "react-redux";
@@ -292,10 +293,13 @@ const UserPage = () => {
     dispatch(createNewUserToFirebase(user));
   }
   function handleRemoveUser(id) {
-    dispatch(removeMemberFromFirebase(id));
+    dispatch(removeUserFromFirebase(id));
   }
   useEffect(() => {
+    if(!isEditting&&!isCreating){
     updateSearchParams();
+
+    }
   }, [isEditting, isCreating]);
   function updateSearchParams() {
     if (firstRender.current) {

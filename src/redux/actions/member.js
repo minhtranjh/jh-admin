@@ -46,11 +46,30 @@ const pushPictureToStorage = async (file) => {
   }
   return;
 };
+const onDispatchCreateMemberRequest = () => {
+  return {
+    type: `${memberConstants.CREATE_NEW_MEMBER}_REQUEST`,
+  };
+};
+const onDispatchCreateMemberSuccess = (payload) => {
+  return {
+    type: `${memberConstants.CREATE_NEW_MEMBER}_SUCCESS`,
+    payload: {
+      ...payload,
+    },
+  };
+};
+const onDispatchCreateMemberFailed = (error) => {
+  return {
+    type: `${memberConstants.CREATE_NEW_MEMBER}_FAILED`,
+    payload: {
+      error: error,
+    },
+  };
+};
 export const createNewMemberToFirebase = (member) => {
   return async (dispatch) => {
-    dispatch({
-      type: `${memberConstants.CREATE_NEW_MEMBER}_REQUEST`,
-    });
+    dispatch(onDispatchCreateMemberRequest());
     let url;
     if (member.picture.type) {
       url = await pushPictureToStorage(member.picture);
@@ -64,21 +83,15 @@ export const createNewMemberToFirebase = (member) => {
         picture: url ? url : "",
       })
       .then((_) => {
-        dispatch({
-          type: `${memberConstants.CREATE_NEW_MEMBER}_SUCCESS`,
-          payload: {
+        dispatch(
+          onDispatchCreateMemberSuccess({
             unsubCreateMember,
             message: "Create successfully",
-          },
-        });
+          })
+        );
       })
       .catch((error) => {
-        dispatch({
-          type: `${memberConstants.CREATE_NEW_MEMBER}_FAILED`,
-          payload: {
-            error: error.message,
-          },
-        });
+        dispatch(onDispatchCreateMemberFailed(error.message));
       });
   };
 };
@@ -96,19 +109,37 @@ const formatInputDate = (d) => {
       : Number(date.getDate()));
   return formattedDate;
 };
+const onDispatchGetMemberDetailsFromTempListSuccess = (id) => {
+  return {
+    type: `${memberConstants.GET_MEMBER_DETAILS_FROM_TEMP_LIST}_SUCCESS`,
+    payload: { id },
+  };
+};
 export const getMemberDetailsFromTempList = (id) => {
   return async (dispatch) => {
-    dispatch({
-      type: `${memberConstants.GET_MEMBER_DETAILS_FROM_TEMP_LIST}_SUCCESS`,
-      payload: { id },
-    });
+    dispatch(onDispatchGetMemberDetailsFromTempListSuccess(id));
+  };
+};
+const onDispatchGetMemberDetailsRequest = () => {
+  return {
+    type: `${memberConstants.GET_MEMBER_DETAILS}_REQUEST`,
+  };
+};
+const onDispatchGetMemberDetailsSuccess = (payload) => {
+  return {
+    type: `${memberConstants.GET_MEMBER_DETAILS}_SUCCESS`,
+    payload: { ...payload },
+  };
+};
+const onDispatchGetMemberDetailsFailed = (error) => {
+  return {
+    type: `${memberConstants.GET_MEMBER_DETAILS}_FAILED`,
+    payload: { error },
   };
 };
 export const getMemberDetailsByIdFromFirebase = (id) => {
   return async (dispatch) => {
-    dispatch({
-      type: `${memberConstants.GET_MEMBER_DETAILS}_REQUEST`,
-    });
+    dispatch(onDispatchGetMemberDetailsRequest());
     try {
       if (id) {
         const unsubscribeMemberDetails = membersTbRef
@@ -126,60 +157,73 @@ export const getMemberDetailsByIdFromFirebase = (id) => {
                 team: team ? team.id : "",
                 dateOfBirth: formattedBirth,
               };
-              dispatch({
-                type: `${memberConstants.GET_MEMBER_DETAILS}_SUCCESS`,
-                payload: { memberDetails, unsubscribeMemberDetails },
-              });
-              return
+              dispatch(
+                onDispatchGetMemberDetailsSuccess({
+                  memberDetails,
+                  unsubscribeMemberDetails,
+                })
+              );
+              return;
             }
-            dispatch({
-              type: `${memberConstants.GET_MEMBER_DETAILS}_FAILED`,
-              payload: { error: "Not found" },
-            });
+            dispatch(onDispatchGetMemberDetailsFailed("Not found"));
           });
       }
     } catch (error) {
-      dispatch({
-        type: `${memberConstants.GET_MEMBER_DETAILS}_FAILED`,
-        payload: {
-          error: error.message,
-        },
-      });
+      dispatch(onDispatchGetMemberDetailsFailed(error.message));
     }
   };
 };
 export const filterMemberFromFirebase = () => {
   return async (dispatch) => {};
 };
+const onDispatchFilterListMemberSuccess = (filterObj) => {
+  return {
+    type: `${memberConstants.FILTER_MEMBER}_SUCCESS`,
+    payload: {
+      filterObj,
+    },
+  };
+};
 export const filterListMember = (filterObj) => {
   return async (dispatch) => {
-    dispatch({
-      type: `${memberConstants.FILTER_MEMBER}_SUCCESS`,
-      payload: {
-        filterObj,
-      },
-    });
+    dispatch(onDispatchFilterListMemberSuccess(filterObj));
+  };
+};
+const onDispatchClearFilteredMemberListSuccess = () => {
+  return {
+    type: `${memberConstants.CLEAR_FILTER_LIST}_SUCCESS`,
   };
 };
 export const clearFilteredMemberList = () => {
   return async (dispatch) => {
-    dispatch({
-      type: `${memberConstants.CLEAR_FILTER_LIST}_SUCCESS`,
-    });
+    dispatch(onDispatchClearFilteredMemberListSuccess());
+  };
+};
+const onDispatchGetMemberDoesNotManageAnyTeam = () => {
+  return {
+    type: `${memberConstants.GET_MEMBER_NOT_MANAGE_TEAM}_REQUEST`,
   };
 };
 export const getMemberDoesNotManageAnyTeam = () => {
   return async (dispatch) => {
-    dispatch({
-      type: `${memberConstants.GET_MEMBER_NOT_MANAGE_TEAM}_REQUEST`,
-    });
+    dispatch(onDispatchGetMemberDoesNotManageAnyTeam());
+  };
+};
+
+const onDispatchGetListMemberFromFirebaseRequest = () => {
+  return {
+    type: `${memberConstants.GET_LIST_MEMBERS}_REQUEST`,
+  };
+};
+const onDispatchGetListMemberFromFirebaseSuccess = (payload) => {
+  return {
+    type: `${memberConstants.GET_LIST_MEMBERS}_SUCCESS`,
+    payload: { ...payload },
   };
 };
 export const getListMembersFromFirebase = () => {
   return async (dispatch) => {
-    dispatch({
-      type: `${memberConstants.GET_LIST_MEMBERS}_REQUEST`,
-    });
+    dispatch(onDispatchGetListMemberFromFirebaseRequest());
     const unsubscribe = membersTbRef
       .orderBy("joinedDate", "desc")
       .onSnapshot((snap) => {
@@ -212,20 +256,41 @@ export const getListMembersFromFirebase = () => {
           });
           index++;
           if (isDoneLoopingSnapshot(index, snap.size)) {
-            dispatch({
-              type: `${memberConstants.GET_LIST_MEMBERS}_SUCCESS`,
-              payload: { memberList, unsubscribe },
-            });
+            dispatch(
+              onDispatchGetListMemberFromFirebaseSuccess({
+                memberList,
+                unsubscribe,
+              })
+            );
           }
         });
       });
   };
 };
+const onDispatchEditMemberRequest = () => {
+  return {
+    type: `${memberConstants.EDIT_MEMBER_DETAILS}_REQUEST`,
+  };
+};
+const onDispatchEditMemberSuccess = (payload) => {
+  return {
+    type: `${memberConstants.EDIT_MEMBER_DETAILS}_SUCCESS`,
+    payload: {
+      ...payload,
+    },
+  };
+};
+const onDispatchEditMemberFailed = (error) => {
+  return {
+    type: `${memberConstants.EDIT_MEMBER_DETAILS}_FAILED`,
+    payload: {
+      error,
+    },
+  };
+};
 export const editMemberDetailsToFirebase = (member) => {
   return async (dispatch) => {
-    dispatch({
-      type: `${memberConstants.EDIT_MEMBER_DETAILS}_REQUEST`,
-    });
+    dispatch(onDispatchEditMemberRequest());
     let url;
     if (member.picture.type) {
       url = await pushPictureToStorage(member.picture);
@@ -239,56 +304,67 @@ export const editMemberDetailsToFirebase = (member) => {
         picture: url ? url : member.picture,
       })
       .then((_) => {
-        dispatch({
-          type: `${memberConstants.EDIT_MEMBER_DETAILS}_SUCCESS`,
-          payload: {
+        dispatch(
+          onDispatchEditMemberSuccess({
             unsubEditMember,
             message: "Edit successfully",
-          },
-        });
+          })
+        );
       })
       .catch((error) => {
-        dispatch({
-          type: `${memberConstants.EDIT_MEMBER_DETAILS}_FAILED`,
-          payload: {
-            error: error.message,
-          },
-        });
+        dispatch(onDispatchEditMemberFailed(error.message));
       });
+  };
+};
+const onDispatchDeleteMemberRequest = () => {
+  return {
+    type: `${memberConstants.DELETE_MEMBER}_REQUEST`,
+  };
+};
+const onDispatchDeleteMemberSuccess = (payload) => {
+  return {
+    type: `${memberConstants.DELETE_MEMBER}_SUCCESS`,
+    payload: {
+      ...payload,
+    },
+  };
+};
+const onDispatchDeleteMemberFailed = (error) => {
+  return {
+    type: `${memberConstants.DELETE_MEMBER}_FAILED`,
+    payload: {
+      error,
+    },
   };
 };
 export const removeMemberFromFirebase = (id) => {
   return async (dispatch) => {
-    dispatch({
-      type: `${memberConstants.DELETE_MEMBER}_REQUEST`,
-    });
+    debugger
+    dispatch(onDispatchDeleteMemberRequest());
     const unSubDeleteTeam = membersTbRef
       .doc(id)
       .delete()
       .then(() => {
-        dispatch({
-          type: `${memberConstants.DELETE_MEMBER}_SUCCESS`,
-          payload: {
+        dispatch(
+          onDispatchDeleteMemberSuccess({
             message: "Delete successfully",
             unSubDeleteTeam,
-          },
-        });
+          })
+        );
       })
       .catch((error) => {
-        dispatch({
-          type: `${memberConstants.DELETE_MEMBER}_FAILED`,
-          payload: {
-            message: error.message,
-          },
-        });
+        dispatch(onDispatchDeleteMemberFailed(error.message));
       });
   };
 };
 
+const onDispatchClearMemberErrorSuccess = () => {
+  return {
+    type: `${memberConstants.CLEAR_MEMBER_ERROR_MESSAGE}_SUCCESS`,
+  };
+};
 export const clearMemberErrorMessage = () => {
   return async (dispatch) => {
-    dispatch({
-      type: `${memberConstants.CLEAR_MEMBER_ERROR_MESSAGE}_SUCCESS`,
-    });
+    dispatch(onDispatchClearMemberErrorSuccess());
   };
 };

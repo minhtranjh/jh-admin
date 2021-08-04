@@ -58,7 +58,7 @@ const onDispatchRequestUserList = () => {
 const onDispatchGetUserListSuccess = (payload) => {
   return {
     type: `${userConstants.GET_USER_LIST}_SUCCESS`,
-    payload: { ...payload},
+    payload: { ...payload },
   };
 };
 const onDispatchGetUserListFailed = (error) => {
@@ -218,14 +218,15 @@ const onDipatchRequestEditUser = () => {
     type: `${userConstants.EDIT_USER_DETAILS}_REQUEST`,
   };
 };
-const onDipatchEditUserSuccess = () => {
+const onDipatchEditUserSuccess = (payload) => {
   return {
     type: `${userConstants.EDIT_USER_DETAILS}_SUCCESS`,
+    payload: { ...payload },
   };
 };
 const onDipatchEditUserFailed = () => {
   return {
-    type: `${userConstants.EDIT_USER_DETAILS}_SUCCESS`,
+    type: `${userConstants.EDIT_USER_DETAILS}_FAILED`,
   };
 };
 
@@ -233,7 +234,7 @@ export const editUserDetailsToFirebase = (user) => {
   return async (dispatch) => {
     dispatch(onDipatchRequestEditUser());
     try {
-      const unSubEditUser = userTbRef.doc(user.id).update({
+      const unSubEditUser = await userTbRef.doc(user.id).update({
         ...user,
       });
       dispatch(onDipatchEditUserSuccess({ unSubEditUser }));
@@ -250,6 +251,7 @@ const onDispatchRequestRemoveUser = () => {
 const onDispatchRemoveUserSuccess = () => {
   return {
     type: `${userConstants.DELETE_USER}_SUCCESS`,
+    message: "Remove successfully",
   };
 };
 const onDispatchRemoveUserFailed = () => {

@@ -27,6 +27,7 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         isLoading: true,
+        message : "",
       };
       return state;
     case `${positionContstants.GET_POSITION_LIST}_SUCCESS`:

@@ -5,7 +5,7 @@ const initialState = {
   userDetailsTempList: [],
   userDetails: {},
   isLoading: false,
-  isUserDetailsEditting: false,
+  isEditting: false,
   isUserDetailsLoading: false,
   isCreating: false,
   isDeleting: false,
@@ -33,6 +33,7 @@ export default (state = initialState, action) => {
     case `${userConstants.GET_USER_LIST}_REQUEST`:
       state = {
         ...state,
+        message : "",
         isLoading: true,
       };
       return state;
@@ -99,7 +100,7 @@ export default (state = initialState, action) => {
     case `${userConstants.EDIT_USER_DETAILS}_REQUEST`:
       state = {
         ...state,
-        isUserDetailsEditting: true,
+        isEditting: true,
       };
       return state;
     case `${userConstants.EDIT_USER_DETAILS}_SUCCESS`:
@@ -107,15 +108,14 @@ export default (state = initialState, action) => {
         ...state,
         ...action.payload,
         error : "",
-
-        isUserDetailsEditting: false,
+        isEditting: false,
       };
       return state;
     case `${userConstants.EDIT_USER_DETAILS}_FAILED`:
       state = {
         ...state,
         ...action.payload,
-        isUserDetailsEditting: true,
+        isEditting: false,
       };
       return state;
     case `${userConstants.DELETE_USER}_REQUEST`:
