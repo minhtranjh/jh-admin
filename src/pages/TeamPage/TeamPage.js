@@ -9,6 +9,7 @@ import {
   createNewTeamToFirebase,
   editTeamDetailsToFirebase,
   filterTeamList,
+  getTeamByLeaderFromFirebase,
   getTeamDetailsByIdFromFirebase,
   getTeamListFromFirebase,
   removeTeamFromFirebase,
@@ -137,7 +138,8 @@ const TeamPage = () => {
     isDeleting,
     isCreating,
     error,
-    message
+    message,
+    teamByLeader,
   } = useSelector((state) => state.team);
   const { memberList, isLoading: isMemberListLoading } = useSelector(
     (state) => state.member
@@ -227,7 +229,9 @@ const TeamPage = () => {
     }
   }, [isMemberListLoading]);
   useEffect(() => {
-    updateSearchParams();
+    if (!isEditting &&  !isCreating) {
+      updateSearchParams();
+    }
   }, [isEditting, isCreating]);
   function updateSearchParams() {
     if (firstRender.current) {
@@ -245,11 +249,16 @@ const TeamPage = () => {
       });
     }
   }
+  useEffect(() => {
+    if (JSON.stringify(teamByLeader) === "{}") {
+      history.goBack();
+    }
+  }, [teamByLeader]);
   function handleSubmitForm(team) {
     if (!query.get("id")) {
       return dispatch(createNewTeamToFirebase(team));
     }
-    return dispatch(
+    dispatch(
       editTeamDetailsToFirebase({
         ...team,
         id: query.get("id"),
@@ -268,7 +277,7 @@ const TeamPage = () => {
   return (
     <>
       {!checkIsLoadingToViewLoadingIcon() ? <FormLoading /> : ""}
-      <NotifyDialog message={message} error={error}/>
+      <NotifyDialog message={message} error={error} />
       <div className="teamPage">
         <PageTitle
           title=" Team"
@@ -308,9 +317,7 @@ const TeamPage = () => {
         </PageContent>
         {!isTeamDetailsLoading && (
           <FormModal
-            title={
-              query.get("id") ? `Edit team` : "Create a new team"
-            }
+            title={query.get("id") ? `Edit team` : "Create a new team"}
             isContentLoading={isTeamDetailsLoading}
             clearForm={clearInputForm}
             handleSetTouchedInput={handleSetTouchedInput}
@@ -320,6 +327,7 @@ const TeamPage = () => {
             history={history}
             isModalOpen={!!query.get("form")}
             error={error}
+            teamByLeader={teamByLeader}
           />
         )}
       </div>

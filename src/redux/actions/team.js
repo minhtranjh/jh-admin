@@ -79,7 +79,7 @@ export const getTeamDetailsByIdFromFirebase = (id) => {
         }
         dispatch({
           type: `${teamConstants.GET_TEAM_DETAILS}_FAILED`,
-          payload: { error : "404" },
+          payload: { error: "404" },
         });
       });
     } catch (error) {
@@ -136,11 +136,52 @@ export const createNewTeamToFirebase = (team) => {
       });
   };
 };
+
+const onDispatchEditTeamFailed = (team, leader) => {
+  return {
+    type: `${teamConstants.EDIT_TEAM_DETAILS}_FAILED`,
+    payload: {
+      teamByLeader: team,
+      error: {
+        type: "confirm",
+        text: `${leader.lastName + " " + leader.firstName} is managing ${
+          team.name
+        } team. You need to set new leader to ${team.name} team`,
+      },
+    },
+  };
+};
+const getTeamByLeaderFromFirebase = async (leaderId) => {
+  let team;
+  const snap = await teamTbRef.where("leaderId", "==", leaderId).get();
+  snap.forEach((doc) => {
+    team = { ...doc.data(), id: doc.id };
+  });
+  return team;
+};
 export const editTeamDetailsToFirebase = (team) => {
   return async (dispatch) => {
     dispatch({
       type: `${teamConstants.EDIT_TEAM_DETAILS}_REQUEST`,
     });
+    const teamOfNewLeader = await getTeamByLeaderFromFirebase(team.leader);
+    if (teamOfNewLeader&&teamOfNewLeader.id === team.id) {
+      const unSubEditTeam = teamTbRef
+        .doc(team.id)
+        .update({
+          ...team,
+        })
+        .then((_) => {
+          return dispatch({
+            type: `${teamConstants.EDIT_TEAM_DETAILS}_SUCCESS`,
+            payload: { unSubEditTeam, message: "Edit successfully" },
+          });
+        });
+    }
+    if (teamOfNewLeader) {
+      const newLeader = (await membersTbRef.doc(team.leader).get()).data();
+      return dispatch(onDispatchEditTeamFailed(teamOfNewLeader, newLeader));
+    }
     const teamIdOfNewLeader = await (
       await membersTbRef.doc(team.leader).get()
     ).data.teamId;
@@ -156,11 +197,16 @@ export const editTeamDetailsToFirebase = (team) => {
       .doc(team.id)
       .update({
         leaderId: team.leader,
+        name : team.name
       })
       .then((_) => {
         dispatch({
           type: `${teamConstants.EDIT_TEAM_DETAILS}_SUCCESS`,
-          payload: { unSubEditTeam, message: "Edit successfully" },
+          payload: {
+            unSubEditTeam,
+            message: "Edit successfully",
+            teamByLeader: {},
+          },
         });
       })
       .catch((error) => {
@@ -200,10 +246,10 @@ export const removeTeamFromFirebase = (id) => {
       });
   };
 };
-export const clearTeamErrorMessage = ()=>{
+export const clearTeamErrorMessage = () => {
   return async (dispatch) => {
     dispatch({
-      type : `${teamConstants.CLEAR_TEAM_ERROR_MESSAGE}_SUCCESS`
-    })
-  }
-}
+      type: `${teamConstants.CLEAR_TEAM_ERROR_MESSAGE}_SUCCESS`,
+    });
+  };
+};

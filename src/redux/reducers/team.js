@@ -3,8 +3,9 @@ const initialState = {
   teamList: [],
   filteredTeamList: [],
   teamDetails: {},
+  teamByLeader: null,
   isLoading: false,
-  isTeamDetailsEditting: false,
+  isEditting: false,
   isTeamDetailsLoading: false,
   isCreating: false,
   isDeleting: false,
@@ -28,14 +29,14 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         isLoading: true,
+        message: "",
       };
       return state;
     case `${teamConstants.GET_TEAM_LIST}_SUCCESS`:
       state = {
         ...state,
         ...action.payload,
-        error : "",
-
+        error: "",
         isLoading: false,
       };
       return state;
@@ -56,7 +57,7 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         ...action.payload,
-        error : "",
+        error: "",
         isTeamDetailsLoading: false,
       };
       return state;
@@ -71,13 +72,14 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         isCreating: true,
+        message: "",
       };
       return state;
     case `${teamConstants.CREATE_NEW_TEAM}_SUCCESS`:
       state = {
         ...state,
         ...action.payload,
-        error : "",
+        error: "",
 
         isCreating: false,
       };
@@ -92,29 +94,30 @@ export default (state = initialState, action) => {
     case `${teamConstants.EDIT_TEAM_DETAILS}_REQUEST`:
       state = {
         ...state,
-        isTeamDetailsEditting: true,
+        message: "",
       };
       return state;
     case `${teamConstants.EDIT_TEAM_DETAILS}_SUCCESS`:
       state = {
         ...state,
         ...action.payload,
-        error : "",
-
-        isTeamDetailsEditting: false,
+        error: "",
+        isEditting: false,
       };
       return state;
     case `${teamConstants.EDIT_TEAM_DETAILS}_FAILED`:
       state = {
         ...state,
         ...action.payload,
-        isTeamDetailsEditting: true,
+        isEditting: false,
       };
       return state;
     case `${teamConstants.DELETE_TEAM}_REQUEST`:
       state = {
         ...state,
         ...action.payload,
+        message: "",
+
         isDeleting: true,
       };
       return state;
@@ -122,7 +125,7 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         ...action.payload,
-        error : "",
+        error: "",
 
         isDeleting: false,
       };
@@ -140,8 +143,7 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         isFiltering: true,
-        error : "",
-
+        error: "",
         filteredTeamList: newlist,
       };
       return state;
@@ -149,17 +151,36 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         filteredTeamList: [],
-        error : "",
+        error: "",
 
         isFiltering: false,
       };
       return state;
-      case `${teamConstants.CLEAR_TEAM_ERROR_MESSAGE}_SUCCESS`:
-        state = {
-          ...state,
-          error: "",
-        };
-        return state;
+    case `${teamConstants.CLEAR_TEAM_ERROR_MESSAGE}_SUCCESS`:
+      state = {
+        ...state,
+        error: "",
+      };
+      return state;
+    case `${teamConstants.GET_TEAM_BY_LEADER_ID}_REQUEST`:
+      state = {
+        ...state,
+        message: "",
+      };
+      return state;
+    case `${teamConstants.GET_TEAM_BY_LEADER_ID}_SUCCESS`:
+      state = {
+        ...state,
+        ...action.payload,
+      };
+      return state;
+    case `${teamConstants.GET_TEAM_BY_LEADER_ID}_FAILED`:
+      state = {
+        ...state,
+        ...action.payload,
+        message: "",
+      };
+      return state;
     default:
       return state;
   }

@@ -16,6 +16,7 @@ const FormModal = ({
   clearForm,
   error,
   isModalOpen,
+  ...agg
 }) => {
   const renderInputList = () => {
     const output = [];
@@ -39,7 +40,6 @@ const FormModal = ({
     }
     return output;
   };
-  console.log(error);
   return (
     <>
       {!isModalOpen ? (
@@ -55,8 +55,23 @@ const FormModal = ({
           }}
         >
           {!isContentLoading ? (
-              <form onSubmit={handleSubmitForm}>
-                {renderInputList()}
+            <form onSubmit={handleSubmitForm}>
+              {renderInputList()}
+              {error && error.type === "confirm" ? (
+                <div className="teamUpdateConfirm">
+                  <p>{error.text}</p>
+                  <div className="teamUpdateBtn">
+                    <Button  onClick={()=>{history.push({
+                      pathname : history.location.pathname,
+                      search : `?form=true&id=${agg.teamByLeader.id}`
+                    })}} isBlue>Continue</Button>
+                    <Button>Discard</Button>
+                  </div>
+                </div>
+              ) : (
+                ""
+              )}
+              {error?.type !== "confirm" && (
                 <div className="modalBtnGroup">
                   <Button type="submit" isBlue>
                     Submit
@@ -65,7 +80,8 @@ const FormModal = ({
                     Clear
                   </Button>
                 </div>
-              </form>
+              )}
+            </form>
           ) : (
             <FormLoading />
           )}

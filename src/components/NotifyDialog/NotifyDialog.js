@@ -13,12 +13,11 @@ const NotifyDialog = ({ message, error }) => {
     <div className={`notifyDialog ${isOpen ? "isOpen" : ""}`}>
       <div className="messageBox">
         <div className="messageIcon">
-          <i class="fas fa-check"></i>
+          <i className="fas fa-check"></i>
         </div>
         <p>{message ? message : ""}</p>
         <button onClick={()=>setIsOpen(false)} className="messageBtn">Ok</button>
       </div>
-      <p>{message}</p>
     </div>
   );
 };

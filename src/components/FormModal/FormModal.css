@@ -1,3 +1,11 @@
 .modalBtnGroup{
     display:flex;
 }
+.teamUpdateConfirm{
+    margin: 20px 0;
+}
+.teamUpdateBtn{
+    display:flex;
+    width:30%;
+    margin: 20px;
+}

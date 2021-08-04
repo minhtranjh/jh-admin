@@ -277,7 +277,6 @@ const UserPage = () => {
     dispatch(activeUserToFirebase(id));
   }
   function handleUnactiveUser(id) {
-    console.log(id);
     dispatch(unActiveUserToFirebase(id));
   }
   function handleSubmitForm(user) {

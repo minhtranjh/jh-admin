@@ -12,7 +12,6 @@ const initialState = {
   isFiltering: false,
 };
 const handleFilterList = (list, filterObj) => {
-  console.log(list, filterObj);
   const newMemberList = list.filter((value) => {
     for (var key in filterObj) {
       const query = filterObj[key].value.toLowerCase();
@@ -29,6 +28,7 @@ export default (state = initialState, action) => {
     case `${memberConstants.GET_LIST_MEMBERS}_REQUEST`:
       state = {
         ...state,
+        message : "",
         isLoading: true,
       };
       return state;
@@ -73,6 +73,7 @@ export default (state = initialState, action) => {
     case `${memberConstants.GET_MEMBER_DETAILS_FROM_TEMP_LIST}_REQUEST`:
       state = {
         ...state,
+        message : "",
         isMemberDetailsLoading: true,
       };
       return state;
@@ -91,6 +92,7 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         ...action.payload,
+        message : "",
         isMemberDetailsLoading: true,
       };
       return state;

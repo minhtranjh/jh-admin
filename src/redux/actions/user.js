@@ -58,7 +58,7 @@ const onDispatchRequestUserList = () => {
 const onDispatchGetUserListSuccess = (payload) => {
   return {
     type: `${userConstants.GET_USER_LIST}_SUCCESS`,
-    payload: { ...payload, message: "Get user list successfully" },
+    payload: { ...payload},
   };
 };
 const onDispatchGetUserListFailed = (error) => {
@@ -163,7 +163,7 @@ const onDispatchRequestGetUserDetails = (id) => {
 const onDispatchGetUserDetailsSuccess = (userDetails) => {
   return {
     type: `${userConstants.GET_USER_DETAILS}_SUCCESS`,
-    payload: { userDetails, message: "Get user details successfully" },
+    payload: { userDetails },
   };
 };
 const onDispatchGetUserDetailsFail = (error) => {

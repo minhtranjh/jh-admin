@@ -39,7 +39,6 @@ const useFilter = (initialFilterList, submitApplyFilter) => {
         newFilterList[filter].isOpen = false;
       }
     }
-    console.log(newFilterList);
     setFilterList(newFilterList);
     return filterObj;
   };

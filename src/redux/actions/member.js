@@ -235,7 +235,6 @@ export const editMemberDetailsToFirebase = (member) => {
       .update({
         ...member,
         teamId: member.team,
-        joinedDate: new Date(),
         dateOfBirth: new Date(member.dateOfBirth),
         picture: url ? url : member.picture,
       })

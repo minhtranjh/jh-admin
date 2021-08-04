@@ -12,11 +12,14 @@ export const getPositionListFromFirebase = () => {
       const fetchAllUnsubscribe = positionTbRef.onSnapshot((snap) => {
         const positionList = [];
         snap.forEach((doc) => {
-          positionList.push({
-            ...doc.data(),
-            id: doc.id,
-            createdAt: doc.data().createdAt.toDate().toDateString(),
-          });
+          if(!doc.data().name.toLowerCase().includes("operator"))
+          {
+            positionList.push({
+              ...doc.data(),
+              id: doc.id,
+              createdAt: doc.data().createdAt.toDate().toDateString(),
+            });
+          }
         });
         dispatch({
           type: `${positionContstants.GET_POSITION_LIST}_SUCCESS`,
