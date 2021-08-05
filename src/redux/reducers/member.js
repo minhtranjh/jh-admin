@@ -1,6 +1,7 @@
 import { members as memberConstants } from "../contants/index";
 const initialState = {
   memberList: [],
+  pagedMemberList: [],
   filteredMemberList: [],
   memberDetailsTempList: [],
   memberDetails: {},
@@ -10,6 +11,9 @@ const initialState = {
   isDeleting: false,
   isCreating: false,
   isFiltering: false,
+  currentPage: 0,
+  rowsPerPage: 10,
+  totalPages : 0
 };
 const handleFilterList = (list, filterObj) => {
   const newMemberList = list.filter((value) => {
@@ -28,14 +32,24 @@ export default (state = initialState, action) => {
     case `${memberConstants.GET_LIST_MEMBERS}_REQUEST`:
       state = {
         ...state,
-        message : "",
+        message: "",
         isLoading: true,
       };
       return state;
     case `${memberConstants.GET_LIST_MEMBERS}_SUCCESS`:
+      const initialPage = action.payload.currentPage;
+      const initialList = action.payload.memberList;
+      const initialRows = action.payload.rowsPerPage;
+      const totalPages = Math.floor(initialList.length / initialRows ) + 1
+      const list = initialList.slice(
+        (initialPage - 1) * initialRows,
+        initialRows * initialPage
+      );
       state = {
         ...state,
         ...action.payload,
+        pagedMemberList: list,
+        totalPages ,
         error: "",
         isLoading: false,
       };
@@ -44,6 +58,26 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         ...action.payload,
+        isLoading: false,
+      };
+      return state;
+    case `${memberConstants.GET_PAGED_MEMBERS_LIST}_REQUEST`:
+      state = {
+        ...state,
+        message: "",
+        isLoading: true,
+      };
+      return state;
+    case `${memberConstants.GET_PAGED_MEMBERS_LIST}_SUCCESS`:
+      const currentPage = action.payload.currentPage;
+      const pagedlist = state.memberList;
+      const rowsPerPage = action.payload.rowsPerPage;
+      const newList = pagedlist.slice((currentPage - 1) * rowsPerPage, rowsPerPage * currentPage);
+      state = {
+        ...state,
+        ...action.payload,
+        pagedMemberList: newList,
+        error: "",
         isLoading: false,
       };
       return state;
@@ -73,7 +107,7 @@ export default (state = initialState, action) => {
     case `${memberConstants.GET_MEMBER_DETAILS_FROM_TEMP_LIST}_REQUEST`:
       state = {
         ...state,
-        message : "",
+        message: "",
         isMemberDetailsLoading: true,
       };
       return state;
@@ -92,7 +126,7 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         ...action.payload,
-        message : "",
+        message: "",
         isMemberDetailsLoading: true,
       };
       return state;

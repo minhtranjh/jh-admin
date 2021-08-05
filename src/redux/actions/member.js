@@ -210,6 +210,23 @@ export const getMemberDoesNotManageAnyTeam = () => {
   };
 };
 
+const onDispatchPagingListMemberFromSuccess = (payload) => {
+  return {
+    type: `${memberConstants.GET_PAGED_MEMBERS_LIST}_SUCCESS`,
+    payload: {
+      ...payload,
+    },
+  };
+};
+export const pagingMemberList = (currentPage, rowsPerPage) => {
+  return async (dispatch) => {
+    dispatch(
+      onDispatchPagingListMemberFromSuccess({ currentPage, rowsPerPage })
+    );
+  };
+};
+
+
 const onDispatchGetListMemberFromFirebaseRequest = () => {
   return {
     type: `${memberConstants.GET_LIST_MEMBERS}_REQUEST`,
@@ -221,12 +238,14 @@ const onDispatchGetListMemberFromFirebaseSuccess = (payload) => {
     payload: { ...payload },
   };
 };
-export const getListMembersFromFirebase = () => {
+
+export const getListMembersFromFirebase = (currentPage, rowsPerPage) => {
   return async (dispatch) => {
     dispatch(onDispatchGetListMemberFromFirebaseRequest());
     const unsubscribe = membersTbRef
-      .orderBy("joinedDate", "desc")
+      .orderBy("joinedDate", "asc")
       .onSnapshot((snap) => {
+        const lastVisible = snap.docs[snap.docs.length - 1];
         const memberList = [];
         let index = 0;
         snap.forEach(async (doc) => {
@@ -260,6 +279,8 @@ export const getListMembersFromFirebase = () => {
               onDispatchGetListMemberFromFirebaseSuccess({
                 memberList,
                 unsubscribe,
+                currentPage,
+                rowsPerPage,
               })
             );
           }
@@ -339,7 +360,6 @@ const onDispatchDeleteMemberFailed = (error) => {
 };
 export const removeMemberFromFirebase = (id) => {
   return async (dispatch) => {
-    debugger
     dispatch(onDispatchDeleteMemberRequest());
     const unSubDeleteTeam = membersTbRef
       .doc(id)

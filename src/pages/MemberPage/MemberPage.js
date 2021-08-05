@@ -16,7 +16,7 @@ import {
   removeMemberFromFirebase,
   filterListMember,
   clearFilteredMemberList,
-  getMemberDetailsFromTempList,
+  pagingMemberList,
 } from "../../redux/actions/member";
 import { Link, NavLink, useHistory, useParams } from "react-router-dom";
 import FormModal from "../../components/FormModal/FormModal";
@@ -32,6 +32,7 @@ import useValidator from "../../utils/useValidator";
 import { useRef } from "react";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import NotifyDialog from "../../components/NotifyDialog/NotifyDialog";
+import PaginationBar from "../../components/PaginationBar/PaginationBar";
 const tablePropertyList = [
   {
     label: "No.",
@@ -261,7 +262,6 @@ const MemberPage = (props) => {
     handleOnChangeFilter,
     handleOnAppyFilter,
   } = useFilter(initialFilterList, applyFilter);
-
   const { validateEmptyField, validateEmailFormat } = useValidator();
 
   useEffect(() => {
@@ -269,14 +269,14 @@ const MemberPage = (props) => {
       validateEmptyField("Field must be not empty"),
     ];
     inputList.lastName.validators = [
-      validateEmptyField("Field must be not empty")
+      validateEmptyField("Field must be not empty"),
     ];
     inputList.email.validators = [
       validateEmptyField("Field must be not empty"),
-      validateEmailFormat("Email is not valid")
+      validateEmailFormat("Email is not valid"),
     ];
     inputList.position.validators = [
-      validateEmptyField("Field must be not empty")
+      validateEmptyField("Field must be not empty"),
     ];
     inputList.team.validators = [validateEmptyField("Field must be not empty")];
     inputList.gender.validators = [
@@ -325,7 +325,7 @@ const MemberPage = (props) => {
   }, [position.isLoading, team.isLoading]);
   useEffect(() => {
     const getNeededStateFromRedux = () => {
-      dispatch(getListMembersFromFirebase());
+      dispatch(getListMembersFromFirebase(1, 10));
       dispatch(getPositionListFromFirebase());
       dispatch(getTeamListFromFirebase());
     };
@@ -338,7 +338,7 @@ const MemberPage = (props) => {
       !member.isLoading
     ) {
       const filterObj = handleCreateFilterObject();
-      if (member.memberList.length > 0) {
+      if (member.pagedMemberList.length > 0) {
         return dispatch(filterListMember(filterObj));
       }
     }
@@ -408,10 +408,13 @@ const MemberPage = (props) => {
       !member.isCreating
     );
   }
+  function handlePagingListMember  (currentPage, rowsPerPage) {
+    dispatch(pagingMemberList(currentPage, rowsPerPage))
+  }
   return (
     <>
       {!checkIsLoadingToViewLoadingIcon() ? <FormLoading /> : ""}
-      <NotifyDialog message={member.message} error={member.error}/>
+      <NotifyDialog message={member.message} error={member.error} />
       <div className="memberPage">
         <PageTitle
           description="Manage member"
@@ -444,19 +447,21 @@ const MemberPage = (props) => {
             tablePropertyList={tablePropertyList}
             tableDataList={
               !member.isFiltering && member.filteredMemberList.length <= 0
-                ? member.memberList
+                ? member.pagedMemberList
                 : member.filteredMemberList
             }
+          />
+          <PaginationBar
+            currentPage={member.currentPage}
+            rowsPerPage={member.rowsPerPage}
+            totalPages={member.totalPages}
+            handlePagingTable={handlePagingListMember}
           />
         </PageContent>
       </div>
       <FormModal
         isContentLoading={member.isMemberDetailsLoading}
-        title={
-          query.get("id")
-            ? `Edit member`
-            : "Create a new member"
-        }
+        title={query.get("id") ? `Edit member` : "Create a new member"}
         clearForm={clearInputForm}
         handleSetTouchedInput={handleSetTouchedInput}
         handleSubmitForm={handleSubmitCallback}
@@ -464,9 +469,8 @@ const MemberPage = (props) => {
         inputList={inputList}
         history={history}
         isModalOpen={!!query.get("form")}
-
         error={member.error}
-        />
+      />
     </>
   );
 };

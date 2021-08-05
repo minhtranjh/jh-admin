@@ -29,6 +29,7 @@ import useQuery from "../../utils/useQuery";
 import { useRef } from "react";
 import { removeMemberFromFirebase } from "../../redux/actions/member";
 import NotifyDialog from "../../components/NotifyDialog/NotifyDialog";
+import PaginationBar from "../../components/PaginationBar/PaginationBar";
 const tablePropertyList = [
   {
     label: "No.",
@@ -400,6 +401,7 @@ const UserPage = () => {
                 : filteredUserList
             }
           />
+          <PaginationBar/>
         </PageContent>
         <FormModal
           title={query.get("id") ? `Edit user ` : "Create new user"}
