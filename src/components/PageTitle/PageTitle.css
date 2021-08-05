@@ -6,6 +6,7 @@
     font-weight: bold;
     position: relative;
     color: var(--color-grey);
+    z-index: 1;
     padding-left: 20px;
     height: 150px;
     font-family: var(--font-nexabold);

@@ -13,7 +13,10 @@ const initialState = {
   isFiltering: false,
   currentPage: 0,
   rowsPerPage: 10,
-  totalPages : 0
+  totalPages : 0,
+  similiarList : [],
+  isLoadingSimiliarList : false,
+  searchedList : [],
 };
 const handleFilterList = (list, filterObj) => {
   const newMemberList = list.filter((value) => {
@@ -109,6 +112,7 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         message: "",
+        similiarList : [],
         isMemberDetailsLoading: true,
       };
       return state;
@@ -222,6 +226,32 @@ export default (state = initialState, action) => {
         ...state,
         error: "",
       };
+      return state;
+    case `${memberConstants.GET_SIMILIAR_MEMBER_LIST}_REQUEST`:
+      state = {
+        ...state,
+        isLoadingSimiliarList : true,
+        similiarList : [],
+      }
+      return state
+    case `${memberConstants.GET_SIMILIAR_MEMBER_LIST}_SUCCESS`:
+      state ={
+        ...state,
+        ...action.payload,
+        isLoadingSimiliarList : false
+      }
+      return state
+    case `${memberConstants.SEARCH_MEMBER}_SUCCESS`:
+      let fetchState 
+      if(state.memberList.length<=0){
+        fetchState = false
+      }
+      const searchedList = handleFilterList(state.memberList, action.payload.filterObj);
+      state  = {
+        ...state,
+        searchedList,
+        fetchState,
+      }
       return state;
     default:
       return state;

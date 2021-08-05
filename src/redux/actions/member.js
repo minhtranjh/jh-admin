@@ -149,10 +149,15 @@ export const getMemberDetailsByIdFromFirebase = (id) => {
               const position = await getPositionById(doc.data().position);
               const team = await getTeamById(doc.data().teamId);
               const birth = doc.data().dateOfBirth;
+              const joinedDateFormmatted = formatInputDate(
+                doc.data().joinedDate
+              );
               const formattedBirth = formatInputDate(birth);
               const memberDetails = {
                 ...doc.data(),
                 id: doc.id,
+                positionName: position ? position.name : "",
+                teamName: team ? team.name : "",
                 position: position ? position.id : "",
                 team: team ? team.id : "",
                 dateOfBirth: formattedBirth,
@@ -225,7 +230,6 @@ export const pagingMemberList = (currentPage, rowsPerPage) => {
     );
   };
 };
-
 
 const onDispatchGetListMemberFromFirebaseRequest = () => {
   return {
@@ -309,13 +313,13 @@ const onDispatchEditMemberFailed = (error) => {
     },
   };
 };
-export const removeCurrentPage = ()=>{
+export const removeCurrentPage = () => {
   return async (dispatch) => {
     dispatch({
-      type : `${memberConstants.CLEAR_CURRENTPAGE}_SUCCESS`
-    }) 
-  }
-}
+      type: `${memberConstants.CLEAR_CURRENTPAGE}_SUCCESS`,
+    });
+  };
+};
 export const editMemberDetailsToFirebase = (member) => {
   return async (dispatch) => {
     dispatch(onDispatchEditMemberRequest());
@@ -395,3 +399,76 @@ export const clearMemberErrorMessage = () => {
     dispatch(onDispatchClearMemberErrorSuccess());
   };
 };
+
+const onDispatchGetSimiliarProfileRequest = () => {
+  return {
+    type: `${memberConstants.GET_SIMILIAR_MEMBER_LIST}_REQUEST`,
+  };
+};
+const onDispatchGetSimiliarProfileSuccess = (payload) => {
+  return {
+    type: `${memberConstants.GET_SIMILIAR_MEMBER_LIST}_SUCCESS`,
+    payload: {
+      ...payload,
+    },
+  };
+};
+export const getSimiliarProfile = (teamId) => {
+  return async (dispatch) => {
+    dispatch(onDispatchGetSimiliarProfileRequest());
+    membersTbRef
+      .orderBy("joinedDate", "asc")
+      .where("teamId", "==", teamId)
+      .limit(5)
+      .get()
+      .then((snap) => {
+        const similiarList = [];
+        let index = 0;
+        snap.forEach(async (doc) => {
+          let managedBy;
+          const member = { ...doc.data(), id: doc.id };
+          const memberPosition = await getPositionById(member.position);
+          const team = await getTeamById(member.teamId);
+          const leaderOfTeam = await getTeamNameByLeaderId(member.id);
+          if (team) {
+            managedBy = await getManagedByLeaderId(team.leaderId);
+          }
+          const formattedJoinedDate = member.joinedDate.toDate().toDateString();
+          similiarList.push({
+            ...member,
+            id: member.id,
+            team: team ? team.name : undefined,
+            name: member.lastName + " " + member.firstName,
+            leaderOf: leaderOfTeam ? leaderOfTeam.name : undefined,
+            managedBy: managedBy
+              ? {
+                  name: managedBy.lastName + " " + managedBy.firstName,
+                  id: managedBy.id,
+                }
+              : undefined,
+            joinedDate: formattedJoinedDate,
+            position: memberPosition ? memberPosition.name : undefined,
+          });
+          index++;
+          if (isDoneLoopingSnapshot(index, snap.size)) {
+            dispatch(
+              onDispatchGetSimiliarProfileSuccess({
+                similiarList,
+              })
+            );
+          }
+        });
+      });
+  };
+};
+
+export const searchMember = (filterObj)=>{
+  return async (dispatch) => {
+    dispatch({
+      type :`${memberConstants.SEARCH_MEMBER}_SUCCESS`,
+      payload : {
+        filterObj
+      }
+    })
+  }
+}

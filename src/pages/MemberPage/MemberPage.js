@@ -111,9 +111,9 @@ const tablePropertyList = [
               <i className="far fa-edit"></i>
             </button>
           </NavLink>
-          <button className="tableWidgetBtn">
+          <NavLink to={`/member/${rowData.id}`} className="tableWidgetBtn">
             <i className="far fa-copy"></i>
-          </button>
+          </NavLink>
         </div>
       );
     },

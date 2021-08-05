@@ -2,5 +2,74 @@
     padding: 15px 30px 30px 60px;
     display: flex;
     align-items:center;
+    overflow-y: hidden;
     justify-content:space-between;
+}
+
+.userAvatar{
+    position: relative;
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+}
+.profileDropdown{
+    left: -150px;
+    background: var(--color-white);
+    z-index: 10000;
+}
+.profileDropdown p{
+    margin-top: 5px;
+    font-size: 15px;
+    font-weight: bold;
+    color: var(--color-darkblue);
+}
+.searchWrapper{
+    width: 100%;
+    overflow: visible;
+    padding: 10px 0;
+}
+.suggestionBox{
+    position: absolute;
+    left: 100px;
+    border-radius: 5px;
+    top: 95px;
+    width:350px;
+    -webkit-box-shadow: 0px -1px 12px -1px rgba(0,0,0,0.36); 
+    box-shadow: 0px -1px 12px -1px rgba(0,0,0,0.36);
+        border: 2px solid var(--font-lightgrey);
+    padding: 10px;
+    z-index: 100000;
+    background: var(--font-white);
+}
+.suggestionBox a{
+    text-decoration: none;
+    display: block;
+    font-size: 13px;
+    margin-bottom: 10px;
+}
+.suggestionBox h4{
+    font-size: 16px;
+    text-transform: uppercase;
+    padding-bottom: 3px;
+    color: var(--color-blue);
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--color-grey);
+}
+.searchWrapper{
+    position: relative;
+}
+.searchedPos{
+    color: var(--color-silver);
+    font-size: 10px;
+}
+.noResult{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    color: var(--color-darkblue);
+    text-align: center;
+    font-size: 15px;
+}
+.searchGroup{
+    width: 100%;
 }

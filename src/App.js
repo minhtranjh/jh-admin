@@ -12,6 +12,7 @@ import PositionPage from "./pages/PositionPage/PositionPage";
 import TeamPage from "./pages/TeamPage/TeamPage";
 import UserPage from "./pages/UserPage/UserPage";
 import NotFoundPage from "./pages/NotFoundPage/NotFoundPage";
+import MemberDetailPage from "./pages/MemberDetailPage/MemberDetailPage";
 function App() {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);
@@ -33,6 +34,7 @@ function App() {
           <PrivateRoute path="/position" component={PositionPage} />
           <PrivateRoute path="/team" component={TeamPage} />
           <PrivateRoute path="/user" component={UserPage} />
+          <PrivateRoute path="/member/:id" component={MemberDetailPage} />
         </Layout>
         <Route  path="*" component={NotFoundPage} />
       </Switch>
