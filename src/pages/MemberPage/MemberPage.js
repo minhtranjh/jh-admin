@@ -96,7 +96,7 @@ const tablePropertyList = [
           <NavLink
             to={{
               pathname: `${history.location.pathname}`,
-              search: `?form=true&id=${rowData.id}`,
+              search: `${history.location.search}&form=true&id=${rowData.id}`,
               state: rowData.id,
             }}
           >
@@ -346,7 +346,7 @@ const MemberPage = (props) => {
   useEffect(() => {
     updateSearchParams();
   }, [member.isEditting, member.isCreating]);
-
+  
   function updateSearchParams() {
     if (firstRender.current) {
       history.push({
@@ -357,10 +357,13 @@ const MemberPage = (props) => {
       return;
     }
     if (!member.isEditting && !member.isCreating) {
+      const query = new URLSearchParams(history.location.search)
+      query.delete("id")
+      query.delete("form")
       history.push({
         pathname: history.location.pathname,
-        search: undefined,
-      });
+        search : query.toString(),
+      })
     }
   }
   function handleSubmitForm(member) {
@@ -427,7 +430,7 @@ const MemberPage = (props) => {
             <Link
               to={{
                 pathname: `${history.location.pathname}`,
-                search: "?form=true",
+                search: `${history.location.search}&form=true`,
               }}
               className="newBtn"
             >
@@ -455,6 +458,8 @@ const MemberPage = (props) => {
             }
           />
           <PaginationBar
+            isFiltering={member.isFiltering}
+            isLoading={member.isLoading}
             currentPage={member.currentPage}
             rowsPerPage={member.rowsPerPage}
             totalPages={member.totalPages}

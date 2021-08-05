@@ -309,6 +309,13 @@ const onDispatchEditMemberFailed = (error) => {
     },
   };
 };
+export const removeCurrentPage = ()=>{
+  return async (dispatch) => {
+    dispatch({
+      type : `${memberConstants.CLEAR_CURRENTPAGE}_SUCCESS`
+    }) 
+  }
+}
 export const editMemberDetailsToFirebase = (member) => {
   return async (dispatch) => {
     dispatch(onDispatchEditMemberRequest());

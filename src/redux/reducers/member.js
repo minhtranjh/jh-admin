@@ -37,7 +37,7 @@ export default (state = initialState, action) => {
       };
       return state;
     case `${memberConstants.GET_LIST_MEMBERS}_SUCCESS`:
-      const initialPage = action.payload.currentPage;
+      const initialPage =  action.payload.currentPage ;
       const initialList = action.payload.memberList;
       const initialRows = action.payload.rowsPerPage;
       const totalPages = Math.floor(initialList.length / initialRows ) + 1
@@ -48,6 +48,7 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         ...action.payload,
+        currentPage : initialPage,
         pagedMemberList: list,
         totalPages ,
         error: "",
@@ -138,7 +139,6 @@ export default (state = initialState, action) => {
         ...state,
         ...action.payload,
         error: "",
-
         memberDetailsTempList: newArr,
         isMemberDetailsLoading: false,
       };
@@ -162,7 +162,6 @@ export default (state = initialState, action) => {
         ...state,
         ...action.payload,
         error: "",
-
         isEditting: false,
       };
       return state;
@@ -204,9 +203,7 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         isFiltering: true,
-
         error: "",
-
         filteredMemberList: newMemberList,
       };
       return state;
@@ -214,6 +211,8 @@ export default (state = initialState, action) => {
       state = {
         ...state,
         filteredMemberList: [],
+        currentPage : 1,
+        pagedMemberList : state.memberList.slice(0,state.rowsPerPage),
         error: "",
         isFiltering: false,
       };

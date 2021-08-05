@@ -401,7 +401,7 @@ const UserPage = () => {
                 : filteredUserList
             }
           />
-          <PaginationBar/>
+          {/* <PaginationBar/> */}
         </PageContent>
         <FormModal
           title={query.get("id") ? `Edit user ` : "Create new user"}

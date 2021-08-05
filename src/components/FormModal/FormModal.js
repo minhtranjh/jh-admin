@@ -1,5 +1,6 @@
 import React from "react";
 import { useParams } from "react-router-dom";
+import useQuery from "../../utils/useQuery";
 import Button from "../Button/Button";
 import FormInput from "../FormInput/FormInput";
 import FormLoading from "../FormLoading/FormLoading";
@@ -18,6 +19,7 @@ const FormModal = ({
   isModalOpen,
   ...agg
 }) => {
+  const query = useQuery()
   const renderInputList = () => {
     const output = [];
     for (let input in inputList) {
@@ -48,9 +50,12 @@ const FormModal = ({
         <Modal
           title={title}
           onClose={() => {
+            const query = new URLSearchParams(history.location.search);
+            query.delete("id");
+            query.delete("form");
             history.push({
               pathname: history.location.pathname,
-              search: undefined,
+              search: query.toString(),
             });
           }}
         >
@@ -61,10 +66,17 @@ const FormModal = ({
                 <div className="teamUpdateConfirm">
                   <p>{error.text}</p>
                   <div className="teamUpdateBtn">
-                    <Button  onClick={()=>{history.push({
-                      pathname : history.location.pathname,
-                      search : `?form=true&id=${agg.teamByLeader.id}`
-                    })}} isBlue>Continue</Button>
+                    <Button
+                      onClick={() => {
+                        history.push({
+                          pathname: history.location.pathname,
+                          search: `form=true&id=${agg.teamByLeader.id}`,
+                        });
+                      }}
+                      isBlue
+                    >
+                      Continue
+                    </Button>
                     <Button>Discard</Button>
                   </div>
                 </div>

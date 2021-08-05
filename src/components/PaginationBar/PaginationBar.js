@@ -1,18 +1,35 @@
 import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
+import { useHistory } from "react-router-dom";
+import useQuery from "../../utils/useQuery";
 import "./PaginationBar.css";
 const PaginationBar = ({
-  currentPage,
   rowsPerPage,
   handlePagingTable,
+  isLoading,
+  isFiltering,
 }) => {
   const [listLiTag, setListLiTag] = useState([]);
-
-  const pagingListTable = (currentPage, rowsPerPage) => {
-    handlePagingTable(currentPage, rowsPerPage);
+  const history = useHistory();
+  const query = useQuery();
+  const pagingListTable = (currentPage) => {
+    history.push({
+      pathname: history.location.pathname,
+      search: `?page=${currentPage}`,
+    });
   };
-
+  useEffect(() => {
+    if (!isLoading) {
+      const page = parseInt(query.get("page"));
+      if (page) {
+        handlePagingTable(page, rowsPerPage);
+        renderListPageNumber(page);
+        return;
+      }
+      renderListPageNumber(1);
+    }
+  }, [query.get("page"), isLoading]);
   const createPagingPrevButton = (page) => {
     const liTag = (
       <li
@@ -64,8 +81,8 @@ const PaginationBar = ({
     return liTag;
   };
   const renderListPageNumber = (page = 0) => {
+    const totalPages = 10;
     let listLiTag = [];
-    const  totalPages = 10
     let numsBeforeCurrentPage = page - 1;
     let numsAfterCurrentPage = page + 1;
     if (page > 1) {
@@ -118,11 +135,6 @@ const PaginationBar = ({
     }
     setListLiTag([...listLiTag]);
   };
-  useEffect(() => {
-    if (currentPage > 0) {
-      renderListPageNumber(currentPage);
-    }
-  }, [currentPage]);
   return (
     <div className="pagination-bar">
       <ul className="page-list">{listLiTag}</ul>
