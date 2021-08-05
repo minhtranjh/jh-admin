@@ -50,7 +50,7 @@ export const getTeamListFromFirebase = () => {
             ...doc.data(),
             id: doc.id,
             createdAt: doc.data().createdAt.toDate().toDateString(),
-            leader: leader.name,
+            leader: leader ? leader.name : "NULL", 
           });
           index++;
           if (isDoneLoopingSnapShot(index, snap.size)) {
@@ -94,7 +94,7 @@ export const getTeamDetailsByIdFromFirebase = (id) => {
             ...doc.data(),
             id: doc.id,
             createdAt: doc.data().createdAt.toDate().toDateString(),
-            leader: leader.id,
+            leader: leader ? leader.id : "NULL",
           };
           dispatch(
             onDispatchGetTeamDetailSuccess({ teamDetails, unSubGetTeamDetails })
@@ -239,8 +239,7 @@ export const editTeamDetailsToFirebase = (team) => {
       await membersTbRef.doc(team.leader).get()
     ).data.teamId;
     const oldLeaderId = (await teamTbRef.doc(team.id).get()).data().leaderId;
-    const teamIdOfOldLeader = (await membersTbRef.doc(oldLeaderId).get()).data()
-      .teamId;
+    const teamIdOfOldLeader = (await membersTbRef.doc(oldLeaderId).get()).data() ? (await membersTbRef.doc(oldLeaderId).get()).data().teamId : undefined
     if (teamIdOfOldLeader !== teamIdOfNewLeader) {
       membersTbRef.doc(team.leader).update({
         teamId: teamIdOfOldLeader,

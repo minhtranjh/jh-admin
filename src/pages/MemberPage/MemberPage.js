@@ -33,10 +33,12 @@ import { useRef } from "react";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import NotifyDialog from "../../components/NotifyDialog/NotifyDialog";
 import PaginationBar from "../../components/PaginationBar/PaginationBar";
+import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
+import useConfirm from "../../utils/useConfirm";
 const tablePropertyList = [
   {
     label: "No.",
-    render: ({ currentPage,rowsPerPage, index }) => {
+    render: ({ currentPage, rowsPerPage, index }) => {
       return <span>{rowsPerPage * (currentPage - 1) + (index + 1)}.</span>;
     },
   },
@@ -88,7 +90,12 @@ const tablePropertyList = [
       return (
         <div className="tableAction">
           <button
-            onClick={() => rowHandlers.handleRemoveMember(rowData.id)}
+            onClick={() =>
+              rowHandlers.showConfirm(`Do you want to delete ${rowData.firstName}?`)({
+                callback: rowHandlers.handleRemoveMember,
+                param: rowData.id,
+              })
+            }
             className="tableWidgetBtn"
           >
             <i className="far fa-trash-alt"></i>
@@ -346,7 +353,7 @@ const MemberPage = (props) => {
   useEffect(() => {
     updateSearchParams();
   }, [member.isEditting, member.isCreating]);
-  
+
   function updateSearchParams() {
     if (firstRender.current) {
       history.push({
@@ -357,13 +364,13 @@ const MemberPage = (props) => {
       return;
     }
     if (!member.isEditting && !member.isCreating) {
-      const query = new URLSearchParams(history.location.search)
-      query.delete("id")
-      query.delete("form")
+      const query = new URLSearchParams(history.location.search);
+      query.delete("id");
+      query.delete("form");
       history.push({
         pathname: history.location.pathname,
-        search : query.toString(),
-      })
+        search: query.toString(),
+      });
     }
   }
   function handleSubmitForm(member) {
@@ -411,9 +418,10 @@ const MemberPage = (props) => {
       !member.isCreating
     );
   }
-  function handlePagingListMember  (currentPage, rowsPerPage) {
-    dispatch(pagingMemberList(currentPage, rowsPerPage))
+  function handlePagingListMember(currentPage, rowsPerPage) {
+    dispatch(pagingMemberList(currentPage, rowsPerPage));
   }
+  const { confirmState,message, onConfirm, onCancel, showConfirm } = useConfirm();
   return (
     <>
       {!checkIsLoadingToViewLoadingIcon() ? <FormLoading /> : ""}
@@ -446,11 +454,10 @@ const MemberPage = (props) => {
             handleOnApplyFilter={handleOnAppyFilter}
           />
           <Table
-            rowHandlers={{ handleRemoveMember }}
+            rowHandlers={{ handleRemoveMember, showConfirm }}
             tablePropertyList={tablePropertyList}
             currentPage={member.currentPage}
             rowsPerPage={member.rowsPerPage}
-
             tableDataList={
               !member.isFiltering && member.filteredMemberList.length <= 0
                 ? member.pagedMemberList
@@ -467,6 +474,12 @@ const MemberPage = (props) => {
           />
         </PageContent>
       </div>
+      <ConfirmModal
+        confirmState={confirmState}
+        onCancel={onCancel}
+        message={message}
+        onConfirm={onConfirm}
+      />
       <FormModal
         isContentLoading={member.isMemberDetailsLoading}
         title={query.get("id") ? `Edit member` : "Create a new member"}

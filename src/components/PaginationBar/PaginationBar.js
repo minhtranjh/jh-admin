@@ -21,6 +21,7 @@ const PaginationBar = ({
   };
   useEffect(() => {
     if (!isLoading) {
+      window.scrollTo(0,0)
       const page = parseInt(query.get("page"));
       if (page) {
         handlePagingTable(page, rowsPerPage);

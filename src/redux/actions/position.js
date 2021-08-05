@@ -131,7 +131,6 @@ const onDispatchCreatePositionFailed = (error) => {
 };
 export const createNewPositionToFirebase = (position) => {
   return async (dispatch) => {
-    console.log(position);
     dispatch(onDispatchCreatePositionRequest());
     const unSubCreatePostion = positionTbRef
       .add({
