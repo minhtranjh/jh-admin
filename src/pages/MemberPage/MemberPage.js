@@ -36,8 +36,8 @@ import PaginationBar from "../../components/PaginationBar/PaginationBar";
 const tablePropertyList = [
   {
     label: "No.",
-    render: ({ rowData, index }) => {
-      return <span>{index + 1}.</span>;
+    render: ({ currentPage,rowsPerPage, index }) => {
+      return <span>{rowsPerPage * (currentPage - 1) + (index + 1)}.</span>;
     },
   },
   {
@@ -445,6 +445,9 @@ const MemberPage = (props) => {
           <Table
             rowHandlers={{ handleRemoveMember }}
             tablePropertyList={tablePropertyList}
+            currentPage={member.currentPage}
+            rowsPerPage={member.rowsPerPage}
+
             tableDataList={
               !member.isFiltering && member.filteredMemberList.length <= 0
                 ? member.pagedMemberList
