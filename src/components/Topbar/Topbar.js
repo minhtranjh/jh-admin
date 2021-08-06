@@ -45,40 +45,45 @@ const Topbar = () => {
   const [searchValue, setSearchValue] = useState("");
   const { searchedList, fetchState } = useSelector((state) => state.member);
   const ref = useRef(null);
-  
-  const handleSearchSuggestion = (e) => {
+  const openSuggestionBox = () => {
     if (ref.current) {
-      ref.current.style.display = "initital";
+      document.querySelector(".suggestionBox").style.display = "initial"
     }
-      if (!e.target.value) {
-        setSearchValue(e.target.value);
-        dispatch(
-          searchMember({
-            name: {
-              value: "123asdsd12esd21",
-            },
-          })
-        );
-        return setSuggestion([]);
-      }
-      const newList = categories.filter((item) =>
-        item.name.toLowerCase().includes(e.target.value.toLowerCase())
-      );
+  };
+  const hideSuggestionBox = () => {
+    if (ref.current) {
+      document.querySelector(".suggestionBox").style.display = "none"
+    }
+  };
+  const handleSearchSuggestion = (e) => {
+    openSuggestionBox();
+    if (!e.target.value) {
+      setSearchValue(e.target.value);
       dispatch(
         searchMember({
           name: {
-            value: e.target.value,
+            value: "123asdsd12esd21",
           },
         })
       );
-      setSearchValue(e.target.value);
-      setSuggestion(newList);
+      return setSuggestion([]);
+    }
+    const newList = categories.filter((item) =>
+      item.name.toLowerCase().includes(e.target.value.toLowerCase())
+    );
+    dispatch(
+      searchMember({
+        name: {
+          value: e.target.value,
+        },
+      })
+    );
+    setSearchValue(e.target.value);
+    setSuggestion(newList);
   };
   useEffect(() => {
     window.addEventListener("click", () => {
-      if (ref.current) {
-        ref.current.style.display = "none";
-      }
+      hideSuggestionBox();
     });
   }, [ref.current]);
   useEffect(() => {
@@ -93,6 +98,7 @@ const Topbar = () => {
           searchValue={searchValue}
           onChange={handleSearchSuggestion}
           label="Search"
+          openSuggestionBox={openSuggestionBox}
         />
       </div>
       {searchValue && (
@@ -111,13 +117,21 @@ const Topbar = () => {
           <div className="suggestSep">
             {suggestion.length > 0 && <h4>Category</h4>}
             {suggestion.map((item) => (
-              <NavLink to={item.path}>{item.name}</NavLink>
+              <NavLink
+                onClick={() => (ref.current.style.display = "none")}
+                to={item.path}
+              >
+                {item.name}
+              </NavLink>
             ))}
           </div>
           <div className="suggestSep">
             {searchedList.length > 0 && <h4>Member</h4>}
             {searchedList.slice(0, 5).map((item) => (
-              <NavLink to={`/member/${item.id}`}>
+              <NavLink
+                onClick={() => (ref.current.style.display = "none")}
+                to={`/member/${item.id}`}
+              >
                 <p className="searchedName">{item.name}</p>
                 <p className="searchedPos">{item.position}</p>
               </NavLink>

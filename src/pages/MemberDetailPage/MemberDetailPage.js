@@ -13,7 +13,7 @@ import "./MemberDetailPage.css";
 const MemberDetailPage = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { memberDetails, isMemberDetailsLoading, similiarList,isLoadingSimiliarList } = useSelector(
+  const { memberDetails,error, isMemberDetailsLoading, similiarList,isLoadingSimiliarList } = useSelector(
     (state) => state.member
   );
   useEffect(() => {
@@ -24,6 +24,10 @@ const MemberDetailPage = () => {
       dispatch(getSimiliarProfile(memberDetails.team));
     }
   }, [isMemberDetailsLoading]);
+
+  if(!isMemberDetailsLoading&&error==="Not found"){
+    return <Redirect to="/"/>
+  }
   return (
     <>
       <div className="memberDetail">
