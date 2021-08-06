@@ -62,6 +62,7 @@ function SignOutPage() {
     handleOnInputChange,
     handleSubmitCallback,
     handleSetTouchedInput,
+    //why do you need to pass down the handleSignUp? why don't you call it directly?
   } = useForm(initialInputList, handleSignUp);
 
   const { validateMatchedConfirmPassword } = useValidator({
@@ -69,10 +70,14 @@ function SignOutPage() {
   });
   const { validateAtLeastCharacterLength } = useValidator({ maxLength: 6 });
 
-  const { validateEmptyField, validateEmailFormat, combineValidation } =
-    useValidator();
+  const {
+    validateEmptyField,
+    validateEmailFormat,
+    combineValidation,
+  } = useValidator();
 
   useEffect(() => {
+    //why don't pass those validations to useForm and set things up in that hook
     const addValidatorToInputList = () => {
       firstName.validators = [validateEmptyField];
       lastName.validators = [validateEmptyField];
@@ -89,7 +94,7 @@ function SignOutPage() {
         validateMatchedConfirmPassword,
       ];
     };
-    addValidatorDepenedsOnValueToInputList()
+    addValidatorDepenedsOnValueToInputList();
   }, [password.value]);
 
   function handleSignUp() {

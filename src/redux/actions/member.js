@@ -13,11 +13,11 @@ const getPositionById = async (positionId) => {
     : undefined;
 };
 const getTeamById = async (teamId) => {
-  if(teamId){
+  if (teamId) {
     const getTeamSnap = await teamTbRef.doc(teamId).get();
-  return getTeamSnap.exists
-    ? { ...getTeamSnap.data(), id: getTeamSnap.id }
-    : undefined;
+    return getTeamSnap.exists
+      ? { ...getTeamSnap.data(), id: getTeamSnap.id }
+      : undefined;
   }
 };
 const getTeamNameByLeaderId = async (leaderId) => {
@@ -98,6 +98,7 @@ const formatInputDate = (d) => {
 };
 export const setMemberDetailFromTempList = (memberDetails) => {
   return async (dispatch) => {
+    //Should create an action
     dispatch({
       type: `${memberConstants.SET_MEMBER_DETAILS_FROM_TEMP_LIST}_REQUEST`,
     });
@@ -146,31 +147,26 @@ export const getMemberDetailsByIdFromFirebase = (id) => {
     }
   };
 };
-export const filterMemberFromFirebase = ()=>{
-  return async (dispatch) => {
-
-  }
-}
-export const filterListMember = (filterObj)=>{
-  return async (dispatch) => {
-  
-    dispatch({
-      type : `${memberConstants.FILTER_MEMBER}_SUCCESS`,
-      payload : {
-        filterObj
-      }
-    })
-    
-  }
-}
-export const clearFilteredMemberList = ()=>{
+export const filterMemberFromFirebase = () => {
+  return async (dispatch) => {};
+};
+export const filterListMember = (filterObj) => {
   return async (dispatch) => {
     dispatch({
-      type : `${memberConstants.CLEAR_FILTER_LIST}_SUCCESS`,
-
-    })
-  }
-}
+      type: `${memberConstants.FILTER_MEMBER}_SUCCESS`,
+      payload: {
+        filterObj,
+      },
+    });
+  };
+};
+export const clearFilteredMemberList = () => {
+  return async (dispatch) => {
+    dispatch({
+      type: `${memberConstants.CLEAR_FILTER_LIST}_SUCCESS`,
+    });
+  };
+};
 export const getListMembersFromFirebase = () => {
   return async (dispatch) => {
     dispatch({

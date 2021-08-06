@@ -256,8 +256,11 @@ const MemberPage = () => {
     handleOnAppyFilter,
   } = useFilter(initialFilterList, applyFilter);
 
-  const { validateEmptyField, validateEmailFormat, combineValidation } =
-    useValidator();
+  const {
+    validateEmptyField,
+    validateEmailFormat,
+    combineValidation,
+  } = useValidator();
 
   useEffect(() => {
     const addValidatorToInputList = () => {
@@ -306,6 +309,7 @@ const MemberPage = () => {
   }, [member.isMemberDetailsLoading]);
 
   useEffect(() => {
+    //????, declare a func in an If block for what?
     if (!position.isLoading && !team.isLoading) {
       const addPositionAndTeamListToSelectionInputValue = () => {
         const newInputList = { ...inputList };
@@ -322,6 +326,7 @@ const MemberPage = () => {
   }, [position.isLoading, team.isLoading]);
 
   useEffect(() => {
+    // should put the declare fn outside
     const getNeededStateFromRedux = () => {
       dispatch(getListMembersFromFirebase());
       dispatch(getPositionListFromFirebase());
