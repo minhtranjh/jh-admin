@@ -1,21 +1,35 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,700;1,100&display=swap');
-
-:root{
-  --bg-green : #1d2a22;
-  --font-white:#fff;
-  --bg-white:#fff; 
-  --bg-black:#000;  
-  --color-grey:#d6def2;
-  --color-boldgrey:#a7b7d9;
-  --color-silver:#8DA1B7;
-  --color-lightblue:#6e8eb5;
-  --color-blue : #486b9a;
-  --color-darkblue : #213b64;
-  --font-nexalight : "Nexa Light";
-  --font-nexabold : "Nexa Bold"
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,700;1,100&display=swap");
+@font-face {
+  font-family: "nexa_boldregular";
+  src: url("./assets/fonts/nexa_bold-webfont.woff2") format("woff2"),
+    url("./assets/fonts/nexa_bold-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
 }
-*{
+
+@font-face {
+  font-family: "nexa_lightregular";
+  src: url("./assets/fonts/nexa_light-webfont.woff2") format("woff2"),
+    url("./assets/fonts/nexa_light-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+:root {
+  --bg-green: #1d2a22;
+  --font-white: #fff;
+  --bg-white: #fff;
+  --bg-black: #000;
+  --color-grey: #d6def2;
+  --color-boldgrey: #a7b7d9;
+  --color-silver: #8da1b7;
+  --color-lightblue: #6e8eb5;
+  --color-blue: #486b9a;
+  --color-darkblue: #213b64;
+  --font-nexalight: "nexa_lightregular";
+  --font-nexabold: "nexa_boldregular";
+}
+* {
   box-sizing: border-box;
   font-family: var(--font-nexalight);
   margin: 0;

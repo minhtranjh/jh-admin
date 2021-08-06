@@ -166,15 +166,8 @@ const initialInputList = {
 
     // labelIcon: <i className="labelIcon" className="far fa-envelope"></i>,
   },
-  dateOfBirth: {
-    value: "",
-    placeholder: "Birth",
-    name: "dateOfBirth",
-    type: "date",
-    isTouched: false,
-
-    // labelIcon: <i className="labelIcon" className="far fa-envelope"></i>,
-  },
+  
+  
   phone: {
     value: "",
     placeholder: "Phone Number",
@@ -192,6 +185,22 @@ const initialInputList = {
     isTouched: false,
 
     // labelIcon: <i className="labelIcon" className="far fa-envelope"></i>,
+  },
+  dateOfBirth: {
+    value: "",
+    placeholder: "Birth",
+    name: "dateOfBirth",
+    type: "date",
+    isTouched: false,
+
+    // labelIcon: <i className="labelIcon" className="far fa-envelope"></i>,
+  },
+  joinedDate : {
+    value : "",
+    placeholder: "Joined Date",
+    name : "joinedDate",
+    type : "date",
+    isTouched: false,
   },
   team: {
     value: "",

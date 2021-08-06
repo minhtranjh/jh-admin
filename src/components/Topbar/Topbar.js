@@ -44,6 +44,7 @@ const Topbar = () => {
   const [suggestion, setSuggestion] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   const { searchedList, fetchState } = useSelector((state) => state.member);
+  const {user} = useSelector((state)=>state.auth)
   const ref = useRef(null);
   const openSuggestionBox = () => {
     if (ref.current) {
@@ -142,7 +143,7 @@ const Topbar = () => {
       <div className="userAvatar">
         <Avatar picture={avatar} />
         <div className="profileDropdown">
-          <p>Mint</p>
+          <p>{user ? user.displayName : ""}</p>
         </div>
       </div>
     </div>

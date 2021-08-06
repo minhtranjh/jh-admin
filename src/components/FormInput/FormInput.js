@@ -98,8 +98,9 @@ const FormInput = ({
           <p className="formInputError">
             {isTouched && error}
           </p>
-
-          <input
+         <div className="inputDateWrap">
+           <small htmlFor="">{placeholder}</small>
+         <input
             onBlur={handleSetTouchedInput}
             autoComplete={"off"}
             className="formInput date"
@@ -109,6 +110,7 @@ const FormInput = ({
             value={value}
             onChange={onChange}
           />
+         </div>
         </div>
       ),
     },

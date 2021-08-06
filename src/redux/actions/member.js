@@ -161,6 +161,7 @@ export const getMemberDetailsByIdFromFirebase = (id) => {
                 position: position ? position.id : "",
                 team: team ? team.id : "",
                 dateOfBirth: formattedBirth,
+                joinedDate : joinedDateFormmatted,
               };
               dispatch(
                 onDispatchGetMemberDetailsSuccess({
@@ -333,6 +334,7 @@ export const editMemberDetailsToFirebase = (member) => {
         ...member,
         teamId: member.team,
         dateOfBirth: new Date(member.dateOfBirth),
+        joinedDate : new Date(member.joinedDate),
         picture: url ? url : member.picture,
       })
       .then((_) => {

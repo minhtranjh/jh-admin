@@ -32,3 +32,7 @@ textarea{
 .radio input{
     margin-right: 10px;
 }
+.inputDateWrap small{
+    font-size: 10px;
+    color: var(--color-silver);
+}

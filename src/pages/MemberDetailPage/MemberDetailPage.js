@@ -69,7 +69,7 @@ const MemberDetailPage = () => {
                       <p>Register date</p>
                       <p>
                         {memberDetails.joinedDate &&
-                          memberDetails.joinedDate.toDate().toDateString()}
+                          memberDetails.joinedDate}
                       </p>
                     </div>
                   </div>
